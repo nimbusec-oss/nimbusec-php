@@ -5,7 +5,7 @@ class CURLClient {
     // -- The actual cURL instance -- 
     public $curl;
 
-    function __construct ( ) {
+    function __construct ( $enableSSL = true ) {
         
         // -- Init curl --
         $this->curl = curl_init ();
@@ -23,6 +23,11 @@ class CURLClient {
         curl_setopt ( $this->curl, CURLOPT_CAINFO, __DIR__ . "/rootCA/ca-bundle.crt" );
         curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, true );
         curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYHOST, 2 );
+        
+        if(!$enableSSL){
+            curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, false );
+            curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYHOST, 0 );
+        }
         
         // -- Include HTTP header --
         curl_setopt ( $this->curl, CURLOPT_HEADER, true );
