@@ -1,20 +1,20 @@
 <?php
 
 class CURLClient {
-    
-    // -- The actual cURL instance -- 
+
+    // -- The actual cURL instance --
     public $curl;
 
     function __construct ( $enableSSL = true ) {
-        
+
         // -- Init curl --
         $this->curl = curl_init ();
-        
+
         // -- Return the transfer as string instead of putting on stdout --
         curl_setopt ( $this->curl, CURLOPT_RETURNTRANSFER, true );
         // -- Tells PHP to give a proper response message on failure (>= 4xx) --
         curl_setopt ( $this->curl, CURLOPT_FAILONERROR, false );
-        
+
         // -- Curl doesn't have built-in root certificates (like most modern browser do).
         //    You need to explicitly point it to a cacert.pem file or a ca bundle
         //    Without this, curl cannot verify the certificate sent back via ssl. This same root
@@ -23,12 +23,12 @@ class CURLClient {
         curl_setopt ( $this->curl, CURLOPT_CAINFO, __DIR__ . "/rootCA/ca-bundle.crt" );
         curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, true );
         curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYHOST, 2 );
-        
+
         if(!$enableSSL){
             curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, false );
             curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYHOST, 0 );
         }
-        
+
         // -- Include HTTP header --
         curl_setopt ( $this->curl, CURLOPT_HEADER, true );
         // -- Max running time for a curl request (in sec.) --
@@ -38,15 +38,14 @@ class CURLClient {
     }
 
     function __destruct ( ) {
-
         curl_close ( $this->curl );
     }
 
     /**
      * Makes an HTTP request to the specified URL; As the SSL option are set upon instantiating the request will be sent through SSL.
      * After receiving the HTTP response, the method verifies the HTTP code. Depending on the status code it either returns the body on success (200)
-     * or filters the header by the X-Nimbusec-Error field and return it along with the status on failure. 
-     * 
+     * or filters the header by the X-Nimbusec-Error field and return it along with the status on failure.
+     *
      *
      * @param string $http_method - The HTTP method (GET, POST, PUT, DELETE)
      * @param string $url - Full URL of the resource to be accessed
@@ -55,12 +54,18 @@ class CURLClient {
      * @return mixed - Response body from the server
      */
     function send_request ( $http_method, $url, $auth_header = null, $postData = null ) {
-        
+
         // -- Reset certain options --
         curl_setopt ( $this->curl, CURLOPT_URL, $url );
         curl_setopt ( $this->curl, CURLOPT_POST, false );
-        curl_setopt ( $this->curl, CURLOPT_CUSTOMREQUEST, null );
-        
+
+        // -- Used to define requests neither GET or HEAD --
+        //
+        // -- Up to PHP 5.4, there is a bug (fixed in PHP 5.5.11) which prevents CURLOPT_CUSTOMREQUEST to be reseted the way suggested by the official documentation
+        //    "Restore to the internal default by setting this to NULL.", causes CURL to crash as PHP will try to parse it to a string before passing it to the underlaying libararies.
+        //    Solution: Setting it to the passed HTTP Method everytime --
+        curl_setopt ( $this->curl, CURLOPT_CUSTOMREQUEST, $http_method );
+
         switch ( $http_method ) {
             case 'GET':
                 if ( $auth_header ) {
@@ -82,39 +87,38 @@ class CURLClient {
                         'Content-Type: application/json',
                         $auth_header
                 ) );
-                curl_setopt ( $this->curl, CURLOPT_CUSTOMREQUEST, $http_method );
+                // -- Setting CURLOPT_POSTFIELDS would normally imply POST but in this case it's neutralized by CURLOPT_CUSTOMREQUEST (see above) --
                 curl_setopt ( $this->curl, CURLOPT_POSTFIELDS, $postData );
                 break;
             case 'DELETE':
                 curl_setopt ( $this->curl, CURLOPT_HTTPHEADER, array (
                         $auth_header
                 ) );
-                curl_setopt ( $this->curl, CURLOPT_CUSTOMREQUEST, $http_method );
                 break;
         }
-        
+
         $response = curl_exec ( $this->curl );
-        
+
         // -- Retrieve status and header size --
         $httpStatus = curl_getinfo ( $this->curl, CURLINFO_HTTP_CODE );
         $header_size = curl_getinfo ( $this->curl, CURLINFO_HEADER_SIZE );
-        
+
         // -- Retrieve header --
         $header = substr ( $response, 0, $header_size );
         // -- Retrieve body --
         $body = substr ( $response, $header_size );
-        
+
         // -- Return body on success --
         if ( $httpStatus == "200" ) {
             return $body;
         }
-        
+
         // -- Split fields --
         $httpFields = explode ( "\n", $header );
-        
+
         // -- Get status --
         $response = $httpFields[0];
-        
+
         // -- Search for our custom field --
         foreach ( $httpFields as $field ) {
             if ( (strpos ( $field, "X-Nimbusec-Error" )) !== false )
