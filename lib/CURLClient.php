@@ -5,7 +5,7 @@ class CURLClient {
     // -- The actual cURL instance --
     public $curl;
 
-    function __construct ( $enableSSL = true ) {
+    function __construct ( $enableSSL = true, $fresh_connect = true ) {
 
         // -- Init curl --
         $this->curl = curl_init ();
@@ -21,11 +21,10 @@ class CURLClient {
         //    certificate file can be used every time you use SSL in curl
         //    The ca-bundle was automatically converted CA Certs from mozilla.org --
         curl_setopt ( $this->curl, CURLOPT_CAINFO, __DIR__ . "/rootCA/ca-bundle.crt" );
-        curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, true );
+        curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, $enableSSL );
         curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYHOST, 2 );
 
         if(!$enableSSL){
-            curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYPEER, false );
             curl_setopt ( $this->curl, CURLOPT_SSL_VERIFYHOST, 0 );
         }
 
@@ -34,7 +33,11 @@ class CURLClient {
         // -- Max running time for a curl request (in sec.) --
         curl_setopt ( $this->curl, CURLOPT_CONNECTTIMEOUT, 20 );
         // -- Force curl explicitly to connect afresh --
-        curl_setopt ( $this->curl, CURLOPT_FRESH_CONNECT, true );
+        curl_setopt ( $this->curl, CURLOPT_FRESH_CONNECT, $fresh_connect );
+    }
+
+    function __destruct ( ) {
+        curl_close ( $this->curl );
     }
 
     function __destruct ( ) {
