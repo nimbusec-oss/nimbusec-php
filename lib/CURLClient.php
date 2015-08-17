@@ -40,10 +40,6 @@ class CURLClient {
         curl_close ( $this->curl );
     }
 
-    function __destruct ( ) {
-        curl_close ( $this->curl );
-    }
-
     /**
      * Makes an HTTP request to the specified URL; As the SSL option are set upon instantiating the request will be sent through SSL.
      * After receiving the HTTP response, the method verifies the HTTP code. Depending on the status code it either returns the body on success (200)
