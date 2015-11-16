@@ -368,6 +368,101 @@ class NimbusecAPI {
         //    through "substr" which for its part fails it returns boolean false --
         $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl );
     }
+    
+    function findUserConfigurations( $userID ){
+        
+        // -- User Configuration base path --
+        $url = $this->DEFAULT_BASE_URL . "/v2/user/" . $userID . "/config";
+        
+        // -- Create OAuth request based on OAuth consumer and the specific url --
+        $request = OAuthRequest::from_consumer_and_token ( $this->consumer, NULL, 'GET', $url );
+        
+        // -- Make signed OAuth request to contact API server --
+        $request->sign_request ( new OAuthSignatureMethod_HMAC_SHA1 (), $this->consumer, NULL );
+        
+        // -- Get the usable url for the request --
+        $requestUrl = $request->to_url ();
+        
+        // -- Run the cUrl request --
+        $response = $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl );
+        
+        $userConfigs = json_decode ( $response, true );
+        $err = $this->json_last_error_msg_dep ();
+        if ( !empty ( $err ) )
+            throw new NimbusecException ( "JSON: an error occured '{$err}' while trying to decode {$response}" );
+        else
+            return $userConfigs;
+    }
+    
+    function findSpecificUserConfiguration( $userID, $key ) {
+        
+        // -- User Configuration base path --
+        $url = $this->DEFAULT_BASE_URL . "/v2/user/" . $userID . "/config/" . $key . "/";
+        
+        // -- Create OAuth request based on OAuth consumer and the specific url --
+        $request = OAuthRequest::from_consumer_and_token ( $this->consumer, NULL, 'GET', $url );
+        
+        // -- Make signed OAuth request to contact API server --
+        $request->sign_request ( new OAuthSignatureMethod_HMAC_SHA1 (), $this->consumer, NULL );
+        
+        // -- Get the usable url for the request --
+        $requestUrl = $request->to_url ();
+        
+        // -- Run the cUrl request --
+        $response = $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl );
+        
+        return $response;
+    }
+    
+    function createUserConfiguration( $userID, $key, $value ) {
+    
+        $payload = json_encode ( $value );
+        $err = $this->json_last_error_msg_dep ();
+        if ( !empty ( $err ) )
+            throw new NimbusecException ( "JSON: an error ocurred '{$err}' while encoding" );
+        
+        // -- User Configuration base path --
+        $url = $this->DEFAULT_BASE_URL . "/v2/user/" . $userID . "/config/" . $key . "/";
+        
+        // -- Create OAuth request based on OAuth consumer and the specific url --
+        $request = OAuthRequest::from_consumer_and_token ( $this->consumer, NULL, 'PUT', $url );
+        
+        // -- Make signed OAuth request to contact API server --
+        $request->sign_request ( new OAuthSignatureMethod_HMAC_SHA1 (), $this->consumer, NULL );
+        
+        // -- Get the usable url for the request --
+        $requestUrl = $request->to_url ();
+        
+        // -- Run the cUrl request --
+        $response = $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl, null, $payload );
+        
+        $user = json_decode ( $response, true );
+        $err = $this->json_last_error_msg_dep ();
+        if ( !empty ( $err ) )
+            throw new NimbusecException ( "JSON: an error occured '{$err}' while trying to decode {$response}" );
+        else
+            return $user;
+    }
+    
+    function deleteUserConfiguration( $userID, $key ) {
+    
+        // -- User Configuration base path --
+        $url = $this->DEFAULT_BASE_URL . "/v2/user/" . $userID . "/config/" . $key . "/";
+    
+       // -- Create OAuth request based on OAuth consumer and the specific url --
+        $request = OAuthRequest::from_consumer_and_token ( $this->consumer, NULL, 'DELETE', $url );
+        
+        // -- Make signed OAuth request to contact API server --
+        $request->sign_request ( new OAuthSignatureMethod_HMAC_SHA1 (), $this->consumer, NULL );
+        
+        // -- Get the usable url for the request --
+        $requestUrl = $request->to_url ();
+        
+        // -- Run the cUrl request --
+        // -- NOTE: This request would basically return nothing, but as the empty HTTP Response body string will be cut off from the header string
+        //    through "substr" which for its part fails it returns boolean false --
+        $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl );
+    }
 
     /**
      * Create a notification from the given object for a certain user.
