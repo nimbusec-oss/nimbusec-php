@@ -369,6 +369,13 @@ class NimbusecAPI {
         $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl );
     }
     
+    /**
+     * Read all configurations set of a certain user. 
+     * 
+     * @param int $userID - The user's assigned ID (must be valid)
+     * @throws NimbusecException When an error occurs during JSON encoding / decoding process; <br/>Contains the <b>JSON error message</b>.
+     * @return array - An array containing all configuration keys without the corresponding value (See <b>findSpecificUserConfiguration</b> for that).
+     */
     function findUserConfigurations( $userID ){
         
         // -- User Configuration base path --
@@ -394,6 +401,13 @@ class NimbusecAPI {
             return $userConfigs;
     }
     
+    /**
+     * Read a specific configuration value based on the passed key of a certain user.
+     * 
+     * @param int $userID - The user's assigned ID (must be valid)
+     * @param string $key - The key of the configuration to be read
+     * @return string - The value of the configuration
+     */
     function findSpecificUserConfiguration( $userID, $key ) {
         
         // -- User Configuration base path --
@@ -414,13 +428,16 @@ class NimbusecAPI {
         return $response;
     }
     
-    function createUserConfiguration( $userID, $key, $value ) {
-    
-        $payload = json_encode ( $value );
-        $err = $this->json_last_error_msg_dep ();
-        if ( !empty ( $err ) )
-            throw new NimbusecException ( "JSON: an error ocurred '{$err}' while encoding" );
-        
+    /**
+     * Set a specific user configuration based on the passed key of a certain user.
+     * 
+     * @param int $userID - The user's assigned ID (must be valid)
+     * @param string $key - The name of the configuration to be changed
+     * @param string $value - The value to be set being sent as plain text to the API
+     * @return string - The updated configuration value
+     */
+    function setUserConfiguration( $userID, $key, $value ) {
+           
         // -- User Configuration base path --
         $url = $this->DEFAULT_BASE_URL . "/v2/user/" . $userID . "/config/" . $key . "/";
         
@@ -434,16 +451,19 @@ class NimbusecAPI {
         $requestUrl = $request->to_url ();
         
         // -- Run the cUrl request --
-        $response = $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl, null, $payload );
+        $response = $this->client->send_request ( $request->get_normalized_http_method (), $requestUrl, null, $value );
         
-        $user = json_decode ( $response, true );
-        $err = $this->json_last_error_msg_dep ();
-        if ( !empty ( $err ) )
-            throw new NimbusecException ( "JSON: an error occured '{$err}' while trying to decode {$response}" );
-        else
-            return $user;
+        return $response;    
     }
     
+    /**
+     * Deletes a sepecific user configuration based on the passed key of a certain user.
+     * 
+     * No return value.
+     * 
+     * @param int $userID - The user's assigned ID (must be valid)
+     * @param string $key - The key of the configuration to be deleted
+     */
     function deleteUserConfiguration( $userID, $key ) {
     
         // -- User Configuration base path --
