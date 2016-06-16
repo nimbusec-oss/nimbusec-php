@@ -11,8 +11,12 @@
     // -- Create a new instance of the API client --
     $apiInstance = new NimbusecAPI ( $NIMBUSEC_KEY, $NIMBUSEC_SECRET );
     
-    // -- List all domains --
-    echo $apiInstance->findDomains ();
+    // -- List all domains + Exception Handling--
+    try {
+        echo $apiInstance->findDomains ();
+    }catch (Exception $e){
+        echo $e->getMessage();
+    }
     
     // -- Search for a specific domain --
     $domains = $apiInstance->findDomains ( "name=\"www.nimbusec.com\"" );

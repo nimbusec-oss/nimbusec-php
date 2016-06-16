@@ -113,20 +113,17 @@ class CURLClient {
         }
 
         // -- Split fields --
-        $httpFields = explode ( "\n", $header );
+        $httpFields = explode ( "\r\n", $header );
 
         // -- Get status --
         $response = $httpFields[0];
-
+        
         // -- Search for our custom field --
         foreach ( $httpFields as $field ) {
             if ( (strpos ( $field, "X-Nimbusec-Error" )) !== false )
                 $response .= $field;
-        }
-        throw new CUrlException ( $response );
+        } 
+        
+        throw new Exception ( $response );
     }
-}
-
-class CUrlException extends Exception {
-    // pass
 }
