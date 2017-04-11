@@ -28,6 +28,12 @@
             "role": "developer"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/cumulodev/nimbusec-PHP"
+        },
+    ],
     "autoload": {
         "psr-4": {
             "Nimbusec\\": "src/"
