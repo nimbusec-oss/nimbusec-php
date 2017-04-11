@@ -1,8 +1,9 @@
 {
     "name": "nimbusec/nimbusec-php",
-    "description": "The official Nimbusec API PHP Client",
-    "homepage": "https://nimbusec.com",
     "type": "library",
+    "description": "The official Nimbusec API PHP Client",
+    "keywords": ["sdk", "client", "nimbusec", "rest", "api"],
+    "homepage": "https://nimbusec.com",
     "license": "MIT",
     "require": {
         "php": ">=5.6.0",
@@ -16,7 +17,15 @@
     "authors": [
         {
             "name": "Nimbusec",
-            "email": "office@nimbusec.com"
+            "email": "office@nimbusec.com",
+            "homepage": "https://nimbusec.com",
+            "role": "developer"
+        },
+        {
+            "name": "Alen Kocaj",
+            "email": "alen.kocaj@posteo.at",
+            "homepage": "https://github.com/rathalos64",
+            "role": "developer"
         }
     ],
     "autoload": {
@@ -30,6 +39,6 @@
         }
     },
     "scripts":{
-        "test": "phpunit"
+        "test": "phpunit --verbose"
     }
 }

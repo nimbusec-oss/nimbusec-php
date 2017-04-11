@@ -5,7 +5,7 @@ use Nimbusec\API;
 
 class DomainTest extends TestCase {
 	private $api;
-	private $bundle;
+	private $domain;
 
 	public function setUp() {
 		$this->api = new API (
@@ -14,35 +14,34 @@ class DomainTest extends TestCase {
 			getenv("SDK_URL")
 		);
 
-		$this->bundle = getenv("SDK_BUNDLE");
-	}
-
-	public function testFind() {
-		$domains = $this->api->findDomains();
-		$this->assertTrue($domains !== NULL);
-	}
-
-	public function testCreate() {
-		$domain = array (
+		$this->domain = array (
 			"scheme" => "http",
-			"name" => "www.randomurl.com",
-			"deepScan" => "http://www.randomurl.com",
+			"name" => "www.testUrl.com",
+			"deepScan" => "http://www.testUrl.com",
 			"fastScans" => array (
-					"http://www.randomurl.com"
+					"http://www.testUrl.com"
 			),
-			"bundle" => $this->bundle
+			"bundle" => getenv("SDK_BUNDLE")
 		);
+	}
 
-		$created = $this->api->createDomain($domain);
+	public function testFindDomains() {
+		$domains = $this->api->findDomains();
+		$this->assertInternalType("array", $domains);
+		return $domains[0];
+	}
+
+	public function testCreateDomain() {
+		$created = $this->api->createDomain($this->domain, true);
 		$this->assertArrayHasKey("name", $created);
 
 		return $created["name"];
 	}
 
 	/**
-	 * @depends testCreate
+	 * @depends testCreateDomain
 	 */
-	public function testFindWithFilter(string $name) {
+	public function testFindDomainsWithFilter(string $name) {
 		$domains = $this->api->findDomains("name=\"{$name}\"");
 		$this->assertNotEmpty($domains);
 
@@ -52,13 +51,13 @@ class DomainTest extends TestCase {
 	}
 
 	/**
-	 * @depends testFindWithFilter
+	 * @depends testFindDomainsWithFilter
 	 */
-	public function testUpdate(array $fetched) {
+	public function testUpdateDomain(array $fetched) {
 		$fetched["scheme"] = "https";
-		$fetched["deepScan"] = "https://www.randomurl.com";
+		$fetched["deepScan"] = "https://www.testUrl.com";
 		$fetched["fastScans"] = array (
-			"https://www.randomurl.com"
+			"https://www.testUrl.com"
 		);
 
 		$updated = $this->api->updateDomain($fetched["id"], $fetched);
@@ -68,9 +67,51 @@ class DomainTest extends TestCase {
 	}
 
 	/**
-	 * @depends testUpdate
+	 * @depends testUpdateDomain
 	 */
-	public function testDelete(array $updated) {
-		$this->assertEquals(NULL, $this->api->deleteDomain($updated["id"]));
+	public function testDeleteDomain(array $updated) {
+		$this->assertNull($this->api->deleteDomain($updated["id"]));
+	}
+
+	/**
+	 * @depends testFindDomains
+	 */
+	public function testFindResults(array $domain) {
+		$results = $this->api->findResults($domain["id"]);
+		$this->assertInternalType("array", $results);
+		return $results;
+	}
+
+	/**
+	 * @depends testFindDomains
+	 * @depends testFindResults
+	 */
+	public function testFindSpecificResults(array $domain, array $results) {
+		if (count($results) == 0) {
+			$this->markTestSkipped("No results found for this domain");	
+		}
+
+		$result = $this->api->findSpecificResult($domain["id"], $results[0]["id"]);
+		$this->assertArrayHasKey("md5", $result);
+	}
+
+	/**
+	 * @depends testFindDomains
+	 */
+	public function testFindApplications(array $domain) {
+		$applications = $this->api->findApplications($domain["id"]);
+		$this->assertInternalType("array", $applications);
+	}
+
+	/**
+	 * @depends testFindDomains
+	 */
+	public function testFindValidApplications(array $domain) {
+		$applications = $this->api->findApplications($domain["id"]);
+		if (count($applications) == 0) {
+			$this->markTestSkipped("No applications found for this domain");	
+		}
+
+		$this->assertArrayHasKey("name", $applications[0]);
 	}
 }
