@@ -14,12 +14,12 @@ use Nimbusec\OAuth\SignatureMethod\HMACSHA1 as OAuthSignatureMethod_HMAC_SHA1;
 use Exception;
 
 /**
- * The official Nimbusec API client written in PHP. 
+ * The official Nimbusec API client written in PHP.
  * It uses the GuzzleHttp Library to communicate with the Nimbusec API via SSL and the OAuth standard to get the required authentification.
- * 
- * All objects being passed as method parameters must be non-JSON associative arrays as they'll be encoded / decoded and later on send to the server within the method. 
- * Otherwise an exception will be thrown. 
- * 
+ *
+ * All objects being passed as method parameters must be non-JSON associative arrays as they'll be encoded / decoded and later on send to the server within the method.
+ * Otherwise an exception will be thrown.
+ *
  * Please note that this API client may not be complete as for the possible operations described in the Nimbusec API documentation. The API client will be expanded when additional features are needed.
  * See the documentation for more details.
  */
@@ -79,8 +79,8 @@ class API
      * Issues the API to create the given domain.
      *
      * @param array $domain The given domain.
-     * @param boolean $upsert Optional. When set to true, creating an already existing domain will not result in an error. 
-    *                         Instead, it will update the existing domain with the new fields. 
+     * @param boolean $upsert Optional. When set to true, creating an already existing domain will not result in an error.
+     *                        Instead, it will update the existing domain with the new fields.
      * @return array The created (or updated) domain.
      */
     public function createDomain(array $domain, $upsert = false)
@@ -141,7 +141,7 @@ class API
      * Issues the API to update a given domain.
      *
      * @param integer $id The id of the domain which should be updated.
-     * @param array $domain The new domain containing all fields which should be updated. 
+     * @param array $domain The new domain containing all fields which should be updated.
      * @return array The updated domain.
      */
     public function updateDomain($id, array $domain)
@@ -310,8 +310,8 @@ class API
      * Issues the API to create the given user.
      *
      * @param array $user The given user.
-     * @param boolean $upsert Optional. When set to true, creating an already existing user will not result in an error. 
-    *                         Instead, it will update the existing user with the new fields. 
+     * @param boolean $upsert Optional. When set to true, creating an already existing user will not result in an error.
+    *                         Instead, it will update the existing user with the new fields.
      * @return array The created (or updated) user.
      */
     public function createUser(array $user, $upsert = false)
@@ -372,7 +372,7 @@ class API
      * Issues the API to update a given user.
      *
      * @param integer $id The id of the user which should be updated.
-     * @param array $user The new user containing all fields which should be updated. 
+     * @param array $user The new user containing all fields which should be updated.
      * @return array The updated user.
      */
     public function updateUser($id, array $user)

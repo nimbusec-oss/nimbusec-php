@@ -98,11 +98,11 @@ class UserTest extends TestCase
     public function testSetUserConfiguration(array $user)
     {
         $conf = $this->api->setUserConfiguration($user["id"], "language", "de");
-		$this->assertEquals("de", $conf);
+        $this->assertEquals("de", $conf);
         return $user;
     }
 
-	/**
+    /**
      * @depends testUpdateUser
      */
     public function testFindSpecificUserConfiguration(array $user)
@@ -120,9 +120,9 @@ class UserTest extends TestCase
         $this->assertNull($this->api->deleteUserConfiguration($user["id"], "language"));
     }
 
-	// ========================================= [ USER DOMAIN SET ] =========================================
-	    
-	/**
+    // ========================================= [ USER DOMAIN SET ] =========================================
+        
+    /**
      * @depends testUpdateUser
      */
     public function testCreateDomain()
@@ -133,40 +133,42 @@ class UserTest extends TestCase
         return $created;
     }
 
-	/**
+    /**
      * @depends testUpdateUser
-	 * @depends testCreateDomain
+     * @depends testCreateDomain
      */
-	public function testCreateDomainSet($user, $domain) {
-		$set = $this->api->createDomainSet($user["id"], $domain["id"]);
-		$this->assertInternalType("array", $set);
-		$this->assertNotEmpty($set);
-		return array($user, $domain);
-	}
+    public function testCreateDomainSet($user, $domain)
+    {
+        $set = $this->api->createDomainSet($user["id"], $domain["id"]);
+        $this->assertInternalType("array", $set);
+        $this->assertNotEmpty($set);
+        return array($user, $domain);
+    }
 
-	/**
-	 * @depends testCreateDomainSet
+    /**
+     * @depends testCreateDomainSet
      */
-	public function testDeleteFromDomainSet(array $args) {
-		list($user, $domain) = $args;
-		$this->assertNull($this->api->deleteFromDomainSet($user["id"], $domain["id"]));
-		return $domain;
-	}
+    public function testDeleteFromDomainSet(array $args)
+    {
+        list($user, $domain) = $args;
+        $this->assertNull($this->api->deleteFromDomainSet($user["id"], $domain["id"]));
+        return $domain;
+    }
 
-	// ========================================= [ TEAR DOWN ] =========================================
+    // ========================================= [ TEAR DOWN ] =========================================
 
-	/**
-	 * @depends testDeleteFromDomainSet
-	 */
+    /**
+     * @depends testDeleteFromDomainSet
+     */
     public function testDeleteDomain(array $domain)
     {
         $this->assertNull($this->api->deleteDomain($domain["id"]));
     }
 
-	/**
+    /**
      * @depends testUpdateUser
      * @depends testDeleteUserConfiguration
-	 * @depends testDeleteDomain
+     * @depends testDeleteDomain
      */
     public function testDeleteUser(array $updated)
     {
