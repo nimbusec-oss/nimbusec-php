@@ -60,12 +60,17 @@ class API
     /**
      * Concatenates a given path with the client's base uri
      *
-     * @param string $path
+     * @param string $path The given path
+     * @param boolean $trailing Whether a trailing '/' should be added or not.
      * @return string The concatenated url.
      */
-    private function toFullURL($path)
+    private function toFullURL($path, $trailing = false)
     {
-        return Path::join((string) $this->client->getConfig('base_uri'), $path);
+        $url = Path::join((string) $this->client->getConfig('base_uri'), $path);
+        if ($trailing) {
+            $url .= "/";
+        }
+        return $url;
     }
 
     // ========================================= [ DOMAIN ] =========================================
@@ -299,7 +304,7 @@ class API
         return $bundles;
     }
 
-        // ========================================= [ USER ] =========================================
+    // ========================================= [ USER ] =========================================
 
     /**
      * Issues the API to create the given user.
@@ -422,7 +427,7 @@ class API
      */
     public function setUserConfiguration($id, $key, $value)
     {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}");
+        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}/", true);
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -433,7 +438,12 @@ class API
             throw new Exception($this->convertToString($response));
         }
 
-        return $response->getBody()->getContents();
+        $conf = json_decode($response->getBody()->getContents(), true);
+        if ($conf === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $conf;
     }
 
     /**
@@ -472,7 +482,7 @@ class API
      */
     public function findSpecificUserConfiguration($id, $key)
     {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}");
+        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -487,7 +497,7 @@ class API
         if ($conf === null) {
             throw new Exception(json_last_error_msg());
         }
-
+        
         return $conf;
     }
 
@@ -499,7 +509,7 @@ class API
      */
     public function deleteUserConfiguration($id, $key)
     {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}");
+        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -522,7 +532,7 @@ class API
      */
     public function createNotification($notification, $userId)
     {
-        $url = $this->toFullURL("/v2/user/{$userId}/$notification");
+        $url = $this->toFullURL("/v2/user/{$userId}/notification");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);

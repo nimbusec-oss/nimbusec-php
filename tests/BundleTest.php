@@ -16,6 +16,8 @@ class BundleTest extends TestCase
         );
     }
 
+    // ========================================= [ BUNDLE ] =========================================
+
     public function testFindBundles()
     {
         $bundles = $this->api->findBundles();

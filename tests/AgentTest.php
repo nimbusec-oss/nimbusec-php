@@ -24,6 +24,8 @@ class AgentTest extends TestCase
         $this->agentVer = getenv("SDK_AGENT_VERSION");
     }
 
+    // ========================================= [ AGENT TOKEN ] =========================================
+
     public function testFindAgentToken()
     {
         $token = $this->api->findAgentToken();
@@ -53,6 +55,8 @@ class AgentTest extends TestCase
     {
         $this->assertEquals(null, $this->api->deleteAgentToken($token["id"]));
     }
+
+    // ========================================= [ AGENT ] =========================================
 
     public function testFindServerAgents()
     {

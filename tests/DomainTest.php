@@ -27,6 +27,8 @@ class DomainTest extends TestCase
         );
     }
 
+    // ========================================= [ DOMAIN ] =========================================
+
     public function testFindDomains()
     {
         $domains = $this->api->findDomains();
@@ -80,6 +82,8 @@ class DomainTest extends TestCase
         $this->assertNull($this->api->deleteDomain($updated["id"]));
     }
 
+    // ========================================= [ RESULT ] =========================================
+
     /**
      * @depends testFindDomains
      */
@@ -103,6 +107,8 @@ class DomainTest extends TestCase
         $result = $this->api->findSpecificResult($domain["id"], $results[0]["id"]);
         $this->assertArrayHasKey("md5", $result);
     }
+
+    // ========================================= [ APPLICATION ] =========================================
 
     /**
      * @depends testFindDomains
