@@ -1,57 +1,61 @@
 <?php
-	
-	// -- PHP Example code demonstrating some method calls of the API client --
 
-    require_once ('lib/NimbusecAPI.php');
-    
-    // -- Define credentials --
-    $NIMBUSEC_KEY = '--- YOUR KEY ---';
-    $NIMBUSEC_SECRET = '--- YOUR SECRET ---';
-    
-    // -- Create a new instance of the API client --
-    $apiInstance = new NimbusecAPI ( $NIMBUSEC_KEY, $NIMBUSEC_SECRET );
-    
-    // -- List all domains + Exception Handling--
-    try {
-        echo $apiInstance->findDomains ();
-    }catch (Exception $e){
-        echo $e->getMessage();
+// include autoloader to load Nimbusec API automatically
+require_once("vendor/autoload.php");
+
+// write alias for Nimbusec API
+use Nimbusec\API as API;
+
+// set credentials
+$NIMBUSEC_KEY = 'YOUR KEY';
+$NIMBUSEC_SECRET = 'YOUR SECRET';
+
+// create new Nimbusec API client
+// the default url parameter can be omitted
+$api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, API::DEFAULT_URL);
+
+try {
+    // fetch domains
+    $domains = $api->findDomains();
+    foreach ($domains as $domain) {
+        echo $domain["name"] . "\n";
     }
-    
-    // -- Search for a specific domain --
-    $domains = $apiInstance->findDomains ( "name=\"www.nimbusec.com\"" );
-    $domainID = $domains[0]['id'];
-    
-    // -- Find CMS concerned results for a specific domain --
-    echo $apiInstance->findResults( $domainID, "event=\cms-vulnerable\"");
-    
-    // -- Create a new domain --
-    $newDomain = array (
-            "scheme" => "https",
-            "name" => "www.somedomain.com",
-            "deepScan" => "https://www.somedomain.com",
-            "fastScans" => array (
-                    "https://www.somedomain.com"
-            ),
-            "bundle" => "--- BUNDLE ID ---"
-    );
-    
-    echo $apiInstance->createDomain ( $newDomain );
-    
-    // -- Search for a specific user --
-    $users = $apiInstance->findUsers ( "login=\"someone@example.com\"" );
-    $userID = $users[0]['id'];
-    
-    // -- Update the fetched user --
-    $userUpdate = array (
-            "company" => "Cumulo",
-            "surname" => "Mustermann",
-            "forename" => "Max"
-    );
-    
-    echo $apiInstance->updateUser ( $userID, $userUpdate );
-    
-    // -- Delete the user --
-    $apiInstance->deleteUser ( $userID );
 
-?>
+    // find specific domain
+    $domain = $api->findDomains("name=\"nimbusec.com\"")[0];
+    echo "The id of nimbusec.com domain is: {$domain['id']}\n";
+
+    // find all applications
+    $applications = $api->findApplications($domain["id"]);
+
+    $mapped = array_map(function ($application) {
+        return "{$application['name']}: {$application['version']}";
+    }, $applications);
+    echo "All applications of nimbusec.com: [" . implode(", ", $mapped) . "]\n";
+
+    // find results
+    $results = $api->findResults($domain["id"]);
+    echo "Number of results for nimbusec.com: ". count($results) . "\n";
+
+    // create a new user
+    $user = array(
+        "login" => "john.doe@example.com",
+        "mail" => "john.doe@example.com",
+        "role" => "user",
+        "forename" => "John",
+        "surname" => "Doe"
+    );
+    $created = $api->createUser($user);
+    echo "Created a new user with name {$created['forename']} {$created['surname']}\n";
+
+    // update the user
+    $created["forename"] = "Franz";
+    $updated = $api->updateUser($created["id"], $created);
+    echo "Now we have {$updated['forename']} {$updated['surname']}\n";
+
+    // delete the previously created and updated user
+    $api->deleteUser($updated["id"]);
+    echo "He is gone\n";
+} catch (Exception $e) {
+    echo "[x] an error occured: {$e->getMessage()}\n";
+}
