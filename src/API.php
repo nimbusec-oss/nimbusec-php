@@ -13,8 +13,19 @@ use Nimbusec\OAuth\SignatureMethod\HMACSHA1 as OAuthSignatureMethod_HMAC_SHA1;
 
 use Exception;
 
+/**
+ * The official Nimbusec API client written in PHP. 
+ * It uses the GuzzleHttp Library to communicate with the Nimbusec API via SSL and the OAuth standard to get the required authentification.
+ * 
+ * All objects being passed as method parameters must be non-JSON associative arrays as they'll be encoded / decoded and later on send to the server within the method. 
+ * Otherwise an exception will be thrown. 
+ * 
+ * Please note that this API client may not be complete as for the possible operations described in the Nimbusec API documentation. The API client will be expanded when additional features are needed.
+ * See the documentation for more details.
+ */
 class API
 {
+    // the default url for the API
     const DEFAULT_URL = "https://api.nimbusec.com";
 
     private $consumer = null;
@@ -32,6 +43,12 @@ class API
         $this->consumer = new OAuthConsumer($key, $secret);
     }
 
+    /**
+     * Formats a given GuzzleHttp response and retrieves besides the X-Nimbusec-Error header.
+     *
+     * @param Response $response The given response.
+     * @return string The formates response message.
+     */
     private function convertToString(Response $response)
     {
         return trim(sprintf("%s: %s %s",
@@ -40,6 +57,12 @@ class API
             $response->hasHeader('X-Nimbusec-Error') ? implode(", ", $response->getHeader('X-Nimbusec-Error')) : ''));
     }
 
+    /**
+     * Concatenates a given path with the client's base uri
+     *
+     * @param string $path
+     * @return string The concatenated url.
+     */
     private function toFullURL($path)
     {
         return Path::join((string) $this->client->getConfig('base_uri'), $path);
@@ -47,6 +70,14 @@ class API
 
     // ========================================= [ DOMAIN ] =========================================
 
+    /**
+     * Issues the API to create the given domain.
+     *
+     * @param array $domain The given domain.
+     * @param boolean $upsert Optional. When set to true, creating an already existing domain will not result in an error. 
+    *                         Instead, it will update the existing domain with the new fields. 
+     * @return array The created (or updated) domain.
+     */
     public function createDomain(array $domain, $upsert = false)
     {
         $url = $this->toFullURL("/v2/domain");
@@ -72,6 +103,12 @@ class API
         return $domain;
     }
 
+    /**
+     * Searches for domains that match the given filter criteria.
+     *
+     * @param string $filter Optional. An FQL based filter.
+     * @return array A list of found domains.
+     */
     public function findDomains($filter = null)
     {
         $url = $this->toFullURL("/v2/domain");
@@ -95,6 +132,13 @@ class API
         return $domains;
     }
 
+    /**
+     * Issues the API to update a given domain.
+     *
+     * @param integer $id The id of the domain which should be updated.
+     * @param array $domain The new domain containing all fields which should be updated. 
+     * @return array The updated domain.
+     */
     public function updateDomain($id, array $domain)
     {
         $url = $this->toFullURL("/v2/domain/{$id}");
@@ -116,6 +160,11 @@ class API
         return $domain;
     }
 
+    /**
+     * Issues the API to delete a domain.
+     *
+     * @param interger $id The id of the domain to be deleted.
+     */
     public function deleteDomain($id)
     {
         $url = $this->toFullURL("v2/domain/{$id}");
@@ -132,6 +181,13 @@ class API
 
     // ========================================= [ RESULT ] =========================================
 
+    /**
+     * Searches for results of a domain which match the given filter criteria.
+     *
+     * @param integer $domainId The domain where the results should be searches for.
+     * @param string $filter Optional. An FQL based filter.
+     * @return array A list of found results.
+     */
     public function findResults($domainId, $filter = null)
     {
         $url = $this->toFullURL("v2/domain/{$domainId}/result");
@@ -155,6 +211,13 @@ class API
         return $results;
     }
 
+    /**
+     * Gets a result of a domain by its id.
+     *
+     * @param integer $domainId The domain to search for.
+     * @param integer $resultId The result to search for.
+     * @return array The found result object.
+     */
     public function findSpecificResult($domainId, $resultId)
     {
         $url = $this->toFullURL("v2/domain/{$domainId}/result/{$resultId}");
@@ -178,6 +241,12 @@ class API
 
     // ========================================= [ APPLICATION ] =========================================
 
+    /**
+     * Searches for all applications of a given domain.
+     *
+     * @param integer $domainId The domain to search for.
+     * @return array A list of found applications.
+     */
     public function findApplications($domainId)
     {
         $url = $this->toFullURL("v2/domain/{$domainId}/applications");
@@ -201,6 +270,12 @@ class API
 
     // ========================================= [ BUNDLE ] =========================================
 
+    /**
+     * Searches for bundles which match the given filter criteria.
+     *
+     * @param string $filter Optional. An FQL based filter.
+     * @return array A list of found bundles.
+     */
     public function findBundles($filter = null)
     {
         $url = $this->toFullURL("/v2/bundle");
@@ -224,109 +299,16 @@ class API
         return $bundles;
     }
 
-    // ========================================= [ AGENT ] =========================================
+        // ========================================= [ USER ] =========================================
 
-    public function findServerAgents($filter = null)
-    {
-        $url = $this->toFullURL("/v2/agent/download");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $agents = json_decode($response->getBody()->getContents(), true);
-        if ($agents === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $agents;
-    }
-
-    public function findSpecificServerAgent($os, $arch, $version, $type = "tar.gz")
-    {
-        $url = $this->toFullURL("/v2/agent/download/nimbusagent-{$os}-{$arch}-v{$version}.{$type}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        return $response->getBody()->getContents();
-    }
-
-    // ========================================= [ AGENT TOKEN ] =========================================
-
-    public function createAgentToken($token)
-    {
-        $url = $this->toFullURL("/v2/agent/token");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->post($request->to_url(), ["json" => $token]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $token = json_decode($response->getBody()->getContents(), true);
-        if ($token === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $token;
-    }
-
-    public function findAgentToken($filter = null)
-    {
-        $url = $this->toFullURL("/v2/agent/token");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $token = json_decode($response->getBody()->getContents(), true);
-        if ($token === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $token;
-    }
-
-    public function deleteAgentToken($id)
-    {
-        $url = $this->toFullURL("v2/agent/token/{$id}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-    
-        // send request
-        $response = $this->client->delete($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-    }
-
-    // ========================================= [ CUSTOMER ] =========================================
-
+    /**
+     * Issues the API to create the given user.
+     *
+     * @param array $user The given user.
+     * @param boolean $upsert Optional. When set to true, creating an already existing user will not result in an error. 
+    *                         Instead, it will update the existing user with the new fields. 
+     * @return array The created (or updated) user.
+     */
     public function createUser(array $user, $upsert = false)
     {
         $url = $this->toFullURL("/v2/user");
@@ -352,6 +334,12 @@ class API
         return $user;
     }
 
+    /**
+     * Searches for users that match the given filter criteria.
+     *
+     * @param string $filter Optional. An FQL based filter.
+     * @return array A list of found users.
+     */
     public function findUsers($filter = null)
     {
         $url = $this->toFullURL("/v2/user");
@@ -375,6 +363,13 @@ class API
         return $users;
     }
 
+    /**
+     * Issues the API to update a given user.
+     *
+     * @param integer $id The id of the user which should be updated.
+     * @param array $user The new user containing all fields which should be updated. 
+     * @return array The updated user.
+     */
     public function updateUser($id, array $user)
     {
         $url = $this->toFullURL("/v2/user/{$id}");
@@ -396,6 +391,11 @@ class API
         return $user;
     }
 
+    /**
+     * Issues the API to delete a user.
+     *
+     * @param interger $id The id of the user to be deleted.
+     */
     public function deleteUser($id)
     {
         $url = $this->toFullURL("v2/user/{$id}");
@@ -412,6 +412,14 @@ class API
 
     // ========================================= [ USER CONFIGURATION ] =========================================
 
+    /**
+     * Sets the a user configuration for a user.
+     *
+     * @param integer $id The user to set the conf for.
+     * @param string $key The key of the conf.
+     * @param string $value The value of the conf.
+     * @return string The value of the set configuration.
+     */
     public function setUserConfiguration($id, $key, $value)
     {
         $url = $this->toFullURL("/v2/user/{$id}/config/{$key}");
@@ -428,6 +436,12 @@ class API
         return $response->getBody()->getContents();
     }
 
+    /**
+     * Searches for user configurations of a user.
+     *
+     * @param integer $id The user to search for.
+     * @return array A list of user configurations.
+     */
     public function findUserConfigurations($id)
     {
         $url = $this->toFullURL("/v2/user/{$id}/config");
@@ -449,6 +463,13 @@ class API
         return $confs;
     }
 
+    /**
+     * Gets the user configuration by its key.
+     *
+     * @param integer $id The user to search for.
+     * @param string $key The key of the conf.
+     * @return string The value of the user configuration.
+     */
     public function findSpecificUserConfiguration($id, $key)
     {
         $url = $this->toFullURL("/v2/user/{$id}/config/{$key}");
@@ -470,6 +491,12 @@ class API
         return $conf;
     }
 
+    /**
+     * Issues the API to delete a user configuration.
+     *
+     * @param integer $id The user to search for.
+     * @param string $key The key of the conf.
+     */
     public function deleteUserConfiguration($id, $key)
     {
         $url = $this->toFullURL("/v2/user/{$id}/config/{$key}");
@@ -486,6 +513,13 @@ class API
 
     // ========================================= [ NOTIFICATION ] =========================================
 
+    /**
+     * Issues the API to create the given notification for a user.
+     *
+     * @param array $notification The given notification.
+     * @param integer $userId The user to search for.
+     * @return The created notification.
+     */
     public function createNotification($notification, $userId)
     {
         $url = $this->toFullURL("/v2/user/{$userId}/$notification");
@@ -507,6 +541,13 @@ class API
         return $notification;
     }
 
+    /**
+     * Searches for notifications which match the given filter criteria.
+     *
+     * @param integer $userId The user to search for.
+     * @param string $filter Optional. An FQL based filter.
+     * @return array A list of found notifications.
+     */
     public function findNotifications($userId, $filter = null)
     {
         $url = $this->toFullURL("/v2/user/{$userId}/notification");
@@ -532,6 +573,13 @@ class API
 
     // ========================================= [ USER DOMAIN SET ] =========================================
 
+    /**
+     * Issues the API to create a domain set, assigning a given domain to a given user.
+     *
+     * @param integer $userId The given user.
+     * @param integer $domainId The given domain.
+     * @return array A list of domain sets for the user.
+     */
     public function createDomainSet($userId, $domainId)
     {
         $url = $this->toFullURL("/v2/user/{$userId}/domains");
@@ -553,6 +601,12 @@ class API
         return $domainSet;
     }
 
+    /**
+     * Searches for a domain set by the given user.
+     *
+     * @param integer $userId The user to search for.
+     * @return array A list of domains.
+     */
     public function findDomainSet($userId)
     {
         $url = $this->toFullURL("/v2/user/{$userId}/domains");
@@ -574,6 +628,12 @@ class API
         return $domainSet;
     }
 
+    /**
+     * Issues the API to delete the given domain from the given user's domain set.
+     *
+     * @param integer $userId The user to search for.
+     * @param integer $domainId The domain to delete.
+     */
     public function deleteFromDomainSet($userId, $domainId)
     {
         $url = $this->toFullURL("/v2/user/{$userId}/domains/{$domainId}");
@@ -581,6 +641,139 @@ class API
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
+        // send request
+        $response = $this->client->delete($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+    }
+
+    // ========================================= [ AGENT ] =========================================
+
+    /**
+     * Searches for server agents which match the given filter criteria.
+     *
+     * @param integer $filter Optional. An FQL based filter.
+     * @return array A list of found server agents.
+     */
+    public function findServerAgents($filter = null)
+    {
+        $url = $this->toFullURL("/v2/agent/download");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request->set_parameter('q', $filter);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $agents = json_decode($response->getBody()->getContents(), true);
+        if ($agents === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $agents;
+    }
+
+    /**
+     * Downloads you a specific server agent.
+     *
+     * @param string $os The target operating system.
+     * @param string $arch The target architecture.
+     * @param string $version The target version.
+     * @param string $type The file type. Default on "tar.gz".
+     * @return The found server agent binary
+     */
+    public function findSpecificServerAgent($os, $arch, $version, $type = "tar.gz")
+    {
+        $url = $this->toFullURL("/v2/agent/download/nimbusagent-{$os}-{$arch}-v{$version}.{$type}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        return $response->getBody()->getContents();
+    }
+
+    // ========================================= [ AGENT TOKEN ] =========================================
+
+    /**
+     * Issues the API to create the given agent token.
+     *
+     * @param array $token The given agent token.
+     * @return array The created server agent token.
+     */
+    public function createAgentToken($token)
+    {
+        $url = $this->toFullURL("/v2/agent/token");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->post($request->to_url(), ["json" => $token]);
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $token = json_decode($response->getBody()->getContents(), true);
+        if ($token === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $token;
+    }
+
+    /**
+     * Searches for agent token which match the given filter criteria.
+     *
+     * @param string $filter Optional. An FQL based filter.
+     * @return array A list of found agent token.
+     */
+    public function findAgentToken($filter = null)
+    {
+        $url = $this->toFullURL("/v2/agent/token");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request->set_parameter('q', $filter);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $token = json_decode($response->getBody()->getContents(), true);
+        if ($token === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $token;
+    }
+
+    /**
+     * Issues the API to delete an agent token.
+     *
+     * @param integer $id The agent token to be deleted.
+     */
+    public function deleteAgentToken($id)
+    {
+        $url = $this->toFullURL("v2/agent/token/{$id}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+    
         // send request
         $response = $this->client->delete($request->to_url());
         if ($response->getStatusCode() !== 200) {
