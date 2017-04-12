@@ -4,11 +4,12 @@ namespace Nimbusec\OAuth\SignatureMethod;
 use Nimbusec\OAuth;
 use Nimbusec\OAuth\Util;
 
-class RSASHA1 extends Nimbusec\OAuth\SignatureMethod {
-
-  public function get_name() {
-    return "RSA-SHA1";
-  }
+class RSASHA1 extends Nimbusec\OAuth\SignatureMethod
+{
+    public function get_name()
+    {
+        return "RSA-SHA1";
+    }
 
   // Up to the SP to implement this lookup of keys. Possible ideas are:
   // (1) do a lookup in a table of trusted certs keyed off of consumer
@@ -24,9 +25,10 @@ class RSASHA1 extends Nimbusec\OAuth\SignatureMethod {
   // Either way should return a string representation of the certificate
   // protected abstract function fetch_private_cert(&$request);
 
-  public function build_signature($request, $consumer, $token) {
-    $base_string = $request->get_signature_base_string();
-    $request->base_string = $base_string;
+  public function build_signature($request, $consumer, $token)
+  {
+      $base_string = $request->get_signature_base_string();
+      $request->base_string = $base_string;
 
     // Fetch the private key cert based on the request
     $cert = $this->fetch_private_cert($request);
@@ -40,13 +42,14 @@ class RSASHA1 extends Nimbusec\OAuth\SignatureMethod {
     // Release the key resource
     openssl_free_key($privatekeyid);
 
-    return base64_encode($signature);
+      return base64_encode($signature);
   }
 
-  public function check_signature($request, $consumer, $token, $signature) {
-    $decoded_sig = base64_decode($signature);
+    public function check_signature($request, $consumer, $token, $signature)
+    {
+        $decoded_sig = base64_decode($signature);
 
-    $base_string = $request->get_signature_base_string();
+        $base_string = $request->get_signature_base_string();
 
     // Fetch the public key cert based on the request
     $cert = $this->fetch_public_cert($request);
@@ -60,6 +63,6 @@ class RSASHA1 extends Nimbusec\OAuth\SignatureMethod {
     // Release the key resource
     openssl_free_key($publickeyid);
 
-    return $ok == 1;
-  }
+        return $ok == 1;
+    }
 }
