@@ -5,6 +5,10 @@ The official Nimbusec API client written in PHP.
 
 It provides an interface for communicating and requesting our internal system, easily and securely. The authentication is done through OAuth and it uses GuzzleHTTP for HTTP requests.
 
+It covers most of our interal resources and gives the functionality for quering and submit to them, respectively.
+
+More information about the structure of our API can be found at [our knowledge base](https://kb.nimbusec.com/API/API).
+
 Requirements
 ---------------
 
