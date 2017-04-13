@@ -1,6 +1,10 @@
 Nimbusec, PHP API Client
 ========================
 
+[![Total Downloads](https://poser.pugx.org/nimbusec/nimbusec-php/downloads)](https://packagist.org/packages/nimbusec/nimbusec-php)
+[![Latest Stable Version](https://poser.pugx.org/nimbusec/nimbusec-php/v/stable)](https://packagist.org/packages/nimbusec/nimbusec-php)
+[![License](https://poser.pugx.org/nimbusec/nimbusec-php/license)](https://packagist.org/packages/nimbusec/nimbusec-php)
+
 The official Nimbusec API client written in PHP.
 
 It provides an interface for communicating and requesting our internal system, easily and securely. The authentication is done through OAuth and it uses GuzzleHTTP for HTTP requests. Fully integrable with Composer, the client conforms to PSR-4 for autoloading.
