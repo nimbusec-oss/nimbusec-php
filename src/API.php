@@ -433,17 +433,12 @@ class API
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
-        $response = $this->client->put($request->to_url(), ["json" => $value]);
+        $response = $this->client->put($request->to_url(), ["body" => $value]);
         if ($response->getStatusCode() !== 200) {
             throw new Exception($this->convertToString($response));
         }
 
-        $conf = json_decode($response->getBody()->getContents(), true);
-        if ($conf === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $conf;
+        return $response->getBody()->getContents();
     }
 
     /**
@@ -492,13 +487,8 @@ class API
         if ($response->getStatusCode() !== 200) {
             throw new Exception($this->convertToString($response));
         }
-
-        $conf = json_decode($response->getBody()->getContents(), true);
-        if ($conf === null) {
-            throw new Exception(json_last_error_msg());
-        }
         
-        return $conf;
+        return $response->getBody()->getContents();
     }
 
     /**
