@@ -244,6 +244,35 @@ class API
         return $result;
     }
 
+    /**
+     * Issues the API to update a given result.
+     *
+     * @param integer $domainId The id of the domain.
+     * @param integer $resultId The id of the result which should be updated.
+     * @param array $result The new result containing all fields which should be updated.
+     * @return array The updated result.
+     */
+    public function updateResult($domainId, $resultId, array $result)
+    {
+        $url = $this->toFullURL("/v2/domain/{$domainId}/result/{$resultId}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->put($request->to_url(), ["json" => $result]);
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $result = json_decode($response->getBody()->getContents(), true);
+        if ($result === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $result;
+    }
+
     // ========================================= [ APPLICATION ] =========================================
 
     /**
