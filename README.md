@@ -65,22 +65,22 @@ Basic usage
 ```php
 <?php
 
-// include autoloader to load Nimbusec API automatically
+// Include autoloader to load Nimbusec API automatically.
 require_once("vendor/autoload.php");
 
-// write alias for Nimbusec API
+// Write alias for Nimbusec API.
 use Nimbusec\API as API;
 
-// set credentials
-$NIMBUSEC_KEY = 'YOUR KEY';
-$NIMBUSEC_SECRET = 'YOUR SECRET';
+// Set credentials.
+$NIMBUSEC_KEY = "YOUR KEY";
+$NIMBUSEC_SECRET = "YOUR SECRET";
 
-// create new Nimbusec API client
-// the default url parameter can be omitted
+// Create a Nimbusec API client instance.
+// The default URL parameter can be omitted.
 $api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, API::DEFAULT_URL);
 
 try {
-    // fetch domains
+    // Fetch domains.
     $domains = $api->findDomains();
     foreach ($domains as $domain) {
         echo $domain["name"] . "\n";
@@ -91,7 +91,7 @@ try {
 }
 ```
 
-Take a look at our provided [example file](https://github.com/cumulodev/nimbusec-php/blob/master/example.php) with futher usages.
+Take a look at our provided [example file](https://github.com/cumulodev/nimbusec-php/blob/master/example.php) for futher usages.
 
 Contribution
 ------------

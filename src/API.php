@@ -31,15 +31,19 @@ class API
     private $consumer = null;
     private $client = null;
 
-    public function __construct($key, $secret, $url = self::DEFAULT_URL)
+    public function __construct($key, $secret, $url = self::DEFAULT_URL, $options = [])
     {
-        $this->client = new Client([
-            'base_uri' => $url,
-            'verify' => CaBundle::getBundledCaBundlePath(),
-            'http_errors' => false,
-            'connect_timeout' => 20,
-        ]);
+        $defaults = [
+            "base_uri" => $url,
+            "verify" => CaBundle::getBundledCaBundlePath(),
+            "http_errors" => false,
+            "connect_timeout" => 20,
+        ];
 
+        // append options to config array
+        $config = $defaults + $options;
+
+        $this->client = new Client($config);
         $this->consumer = new OAuthConsumer($key, $secret);
     }
 
