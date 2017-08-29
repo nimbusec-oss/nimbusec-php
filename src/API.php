@@ -184,6 +184,34 @@ class API
         }
     }
 
+    // ========================================= [ INFECTED ] =========================================
+
+    /**
+     * Searches for domains that have results / which are infected.
+     *
+     * @return array A list of found infected domains.
+     */
+    public function findInfected($filter = null)
+    {
+        $url = $this->toFullURL("/v2/infected");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $infected = json_decode($response->getBody()->getContents(), true);
+        if ($infected === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $infected;
+    }
+
     // ========================================= [ RESULT ] =========================================
 
     /**
@@ -456,7 +484,7 @@ class API
      */
     public function setUserConfiguration($id, $key, $value)
     {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}/", true);
+        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
