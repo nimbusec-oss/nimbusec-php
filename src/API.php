@@ -58,7 +58,7 @@ class API
         return trim(sprintf("%s: %s %s",
             $response->getStatusCode(),
             $response->getReasonPhrase(),
-            $response->hasHeader('X-Nimbusec-Error') ? implode(", ", $response->getHeader('X-Nimbusec-Error')) : ''));
+            $response->hasHeader("X-Nimbusec-Error") ? implode(", ", $response->getHeader("X-Nimbusec-Error")) : ""));
     }
 
     /**
@@ -70,7 +70,7 @@ class API
      */
     private function toFullURL($path, $trailing = false)
     {
-        $url = Path::join((string) $this->client->getConfig('base_uri'), $path);
+        $url = Path::join((string) $this->client->getConfig("base_uri"), $path);
         if ($trailing) {
             $url .= "/";
         }
@@ -91,9 +91,9 @@ class API
     {
         $url = $this->toFullURL("/v2/domain");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         if ($upsert) {
-            $request->set_parameter('upsert', $upsert);
+            $request->set_parameter("upsert", $upsert);
         }
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -122,8 +122,8 @@ class API
     {
         $url = $this->toFullURL("/v2/domain");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -152,7 +152,7 @@ class API
     {
         $url = $this->toFullURL("/v2/domain/{$id}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -178,7 +178,7 @@ class API
     {
         $url = $this->toFullURL("v2/domain/{$id}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
     
         // send request
@@ -199,7 +199,7 @@ class API
     {
         $url = $this->toFullURL("/v2/infected");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -229,8 +229,8 @@ class API
     {
         $url = $this->toFullURL("v2/domain/{$domainId}/result");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -259,7 +259,7 @@ class API
     {
         $url = $this->toFullURL("v2/domain/{$domainId}/result/{$resultId}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -288,7 +288,7 @@ class API
     {
         $url = $this->toFullURL("/v2/domain/{$domainId}/result/{$resultId}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -317,7 +317,7 @@ class API
     {
         $url = $this->toFullURL("v2/domain/{$domainId}/applications");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -346,8 +346,8 @@ class API
     {
         $url = $this->toFullURL("/v2/bundle");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -379,9 +379,9 @@ class API
     {
         $url = $this->toFullURL("/v2/user");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         if ($upsert) {
-            $request->set_parameter('upsert', $upsert);
+            $request->set_parameter("upsert", $upsert);
         }
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -410,8 +410,8 @@ class API
     {
         $url = $this->toFullURL("/v2/user");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -440,7 +440,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$id}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -466,7 +466,7 @@ class API
     {
         $url = $this->toFullURL("v2/user/{$id}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
     
         // send request
@@ -490,7 +490,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'PUT', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -512,7 +512,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$id}/config");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -540,7 +540,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -562,7 +562,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -585,7 +585,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$userId}/notification");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -613,8 +613,8 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$userId}/notification");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -645,7 +645,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$userId}/domains");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -672,7 +672,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$userId}/domains");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -699,7 +699,7 @@ class API
     {
         $url = $this->toFullURL("/v2/user/{$userId}/domains/{$domainId}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -721,8 +721,8 @@ class API
     {
         $url = $this->toFullURL("/v2/agent/download");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -753,7 +753,7 @@ class API
     {
         $url = $this->toFullURL("/v2/agent/download/nimbusagent-{$os}-{$arch}-v{$version}.{$type}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -777,7 +777,7 @@ class API
     {
         $url = $this->toFullURL("/v2/agent/token");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'POST', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
@@ -804,8 +804,8 @@ class API
     {
         $url = $this->toFullURL("/v2/agent/token");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'GET', $url);
-        $request->set_parameter('q', $filter);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -832,7 +832,7 @@ class API
     {
         $url = $this->toFullURL("v2/agent/token/{$id}");
 
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, 'DELETE', $url);
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
     
         // send request
