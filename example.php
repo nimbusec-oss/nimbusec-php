@@ -46,7 +46,7 @@ try {
 
     // Find results.
     $results = $api->findResults($domain["id"]);
-    echo "Number of results for nimbusec.com: ". count($results) . "\n";
+    echo "Number of results for nimbusec.com: " . count($results) . "\n";
 
     // Find infected domains with a webshell
     $infected = $api->findInfected("event=\"webshell\"");
