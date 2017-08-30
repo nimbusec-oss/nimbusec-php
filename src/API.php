@@ -193,6 +193,9 @@ class API
     /**
      * Searches for domains that have results / which are infected.
      *
+     * @param string $filter Optional. An FQL based filter. Note: this filter applies to results,
+     *                       not to the actual domains!
+     *
      * @return array A list of found infected domains.
      */
     public function findInfected($filter = null)
@@ -200,6 +203,8 @@ class API
         $url = $this->toFullURL("/v2/infected");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->set_parameter("q", $filter);
+
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request

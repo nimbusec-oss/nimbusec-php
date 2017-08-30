@@ -48,6 +48,10 @@ try {
     $results = $api->findResults($domain["id"]);
     echo "Number of results for nimbusec.com: ". count($results) . "\n";
 
+    // Find infected domains with a webshell
+    $infected = $api->findInfected("event=\"webshell\"");
+    echo "Number of infected domains: " . count($infected) . "\n";
+
     // Create a new user.
     $user = [
         "login" => "john.doe@example.com",
