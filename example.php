@@ -17,7 +17,7 @@ $NIMBUSEC_SECRET = "YOUR SECRET";
 // By passing options, the default options we set for the client can be extended by e.g proxy features.
 // The options can be passed as a variable, otherwise be left empty. Please note: in order to use the options, the URL parameter must be passed.
 $options = [
-    "timeout" => 30, 
+    "timeout" => 30,
     "proxy" => [
         "http"  => "tcp://localhost:8125",
     ],
