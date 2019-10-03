@@ -846,4 +846,61 @@ class API
             throw new Exception($this->convertToString($response));
         }
     }
+    
+    /**
+     * Searches for screenshots of a given domain ID.
+     *
+     * @param string $domainId Required. Domain ID to fetch screenshots for.
+     * @return array A list of found screenshots.
+     */
+    public function findScreenshots($domainId)
+    {
+        $domainId = intval($domainId);
+        $url = $this->toFullURL("/v2/domain/" . $domainId . "/screenshot");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $screenshots = json_decode($response->getBody()->getContents(), true);
+        if ($screenshots === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $screenshots;
+    }
+
+    /**
+     * Get a screenshot from the URL received from @findScreenshots
+     *
+     * @param string $screenshotUrl Required. URL of the screenshot (path)
+     * @return binary string of image which can be read by imagecreatefromstrimg - https://www.php.net/manual/en/function.imagejpeg.php
+     */
+    public function getScreenshotFromUrl($screenshotUrl)
+    {
+        $url = $this->toFullURL($screenshotUrl);
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $screenshotStr = $response->getBody()->getContents();
+        if ($screenshotStr === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $screenshotStr;
+    }
 }
