@@ -77,6 +77,30 @@ class API
         return $url;
     }
 
+    // ========================================== [ PING ] ==========================================
+
+    public function ping()
+    {
+        $url = $this->toFullURL("/v3/ping");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $pong = json_decode($response->getBody()->getContents(), true);
+        if ($pong === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $pong;
+    }
+
+
     // ========================================= [ DOMAIN ] =========================================
 
     /**
@@ -89,7 +113,7 @@ class API
      */
     public function createDomain(array $domain, $upsert = false)
     {
-        $url = $this->toFullURL("/v2/domain");
+        $url = $this->toFullURL("/v3/domains");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         if ($upsert) {
@@ -100,6 +124,29 @@ class API
 
         // send request
         $response = $this->client->post($request->to_url(), ["json" => $domain]);
+        // "all 200 status codes are results of successfull REST requests"
+        // substr($response->getStatusCode(), 0, 1)!=="2"
+        if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $domain = json_decode($response->getBody()->getContents(), true);
+        if ($domain === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $domain;
+    }
+
+    public function getDomain($id)
+    {
+        $url = $this->toFullURL("/v3/domains/{$id}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->put($request->to_url());
         if ($response->getStatusCode() !== 200) {
             throw new Exception($this->convertToString($response));
         }
@@ -120,7 +167,7 @@ class API
      */
     public function findDomains($filter = null)
     {
-        $url = $this->toFullURL("/v2/domain");
+        $url = $this->toFullURL("/v3/domains");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->set_parameter("q", $filter);
@@ -150,7 +197,7 @@ class API
      */
     public function updateDomain($id, array $domain)
     {
-        $url = $this->toFullURL("/v2/domain/{$id}");
+        $url = $this->toFullURL("/v3/domains/{$id}");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -176,19 +223,20 @@ class API
      */
     public function deleteDomain($id)
     {
-        $url = $this->toFullURL("v2/domain/{$id}");
+        $url = $this->toFullURL("v3/domains/{$id}");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
     
         // send request
         $response = $this->client->delete($request->to_url());
-        if ($response->getStatusCode() !== 200) {
+        // 204 is the correct response for successfull delete
+        if ($response->getStatusCode() !== 204) {
             throw new Exception($this->convertToString($response));
         }
     }
 
-    // ========================================= [ INFECTED ] =========================================
+    // ========================================= [ TODO:? INFECTED ] =========================================
 
     /**
      * Searches for domains that have results / which are infected.
@@ -221,7 +269,7 @@ class API
         return $infected;
     }
 
-    // ========================================= [ RESULT ] =========================================
+    // ========================================= [ TODO:?RESULT ] =========================================
 
     /**
      * Searches for results of a domain which match the given filter criteria.
@@ -232,6 +280,7 @@ class API
      */
     public function findResults($domainId, $filter = null)
     {
+        // TODO: is result endpoint still relevant? -> not in v3 swagger-docs
         $url = $this->toFullURL("v2/domain/{$domainId}/result");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
@@ -253,6 +302,7 @@ class API
         return $results;
     }
 
+
     /**
      * Gets a result of a domain by its id.
      *
@@ -262,7 +312,8 @@ class API
      */
     public function findSpecificResult($domainId, $resultId)
     {
-        $url = $this->toFullURL("v2/domain/{$domainId}/result/{$resultId}");
+        // TODO: is result endpoint still relevant? -> not in v3 swagger-docs
+        $url = $this->toFullURL("v2/domains/{$domainId}/result/{$resultId}");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -291,7 +342,8 @@ class API
      */
     public function updateResult($domainId, $resultId, array $result)
     {
-        $url = $this->toFullURL("/v2/domain/{$domainId}/result/{$resultId}");
+        // TODO: is result endpoint still relevant? -> not in v3 swagger-docs
+        $url = $this->toFullURL("/v2/domains/{$domainId}/result/{$resultId}");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -310,7 +362,72 @@ class API
         return $result;
     }
 
-    // ========================================= [ APPLICATION ] =========================================
+    // ========================================= [ METADATA ] =========================================
+
+    public function getDomainMetadata($domainId){
+        // $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
+        $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $metadata = json_decode($response->getBody()->getContents(), true);
+        if ($metadata === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $metadata;
+    }
+
+    public function listDomainMetadata(){
+        $url = $this->toFullURL("v3/domains/metadata");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $metadata = json_decode($response->getBody()->getContents(), true);
+        if ($metadata === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $metadata;
+    }
+
+    // ========================================= [ STATISTICS ] =========================================
+
+    public function listStats(){
+        $url = $this->toFullURL("v3/domains/stats");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $stats = json_decode($response->getBody()->getContents(), true);
+        if ($stats === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $stats;
+    }
+
+    // ========================================= [ TODO:? APPLICATION ] =========================================
 
     /**
      * Searches for all applications of a given domain.
@@ -320,6 +437,7 @@ class API
      */
     public function findApplications($domainId)
     {
+        // TODO: is applications endpoint still relevant? -> not in v3 swagger-docs
         $url = $this->toFullURL("v2/domain/{$domainId}/applications");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
