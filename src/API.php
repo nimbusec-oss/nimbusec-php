@@ -100,6 +100,53 @@ class API
         return $pong;
     }
 
+    // ========================================= [ BUNDLE ] =========================================
+
+    
+    public function getBundle($id)
+    {
+        $url = $this->toFullURL("/v3/bundles/{$id}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->put($request->to_url());
+        // echo $response->getBody();
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+
+        $bundles = json_decode($response->getBody()->getContents(), true);
+        if ($bundles === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $bundles;
+    }
+
+    public function listBundles(){
+        $url = $this->toFullURL("v3/bundles");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        // echo $response->getBody();
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $bundles = json_decode($response->getBody()->getContents(), true);
+        if ($bundles === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $bundles;
+    }
+
 
     // ========================================= [ DOMAIN ] =========================================
 
@@ -129,7 +176,7 @@ class API
         if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
             throw new Exception($this->convertToString($response));
         }
-
+        
         $domain = json_decode($response->getBody()->getContents(), true);
         if ($domain === null) {
             throw new Exception(json_last_error_msg());
@@ -147,9 +194,11 @@ class API
 
         // send request
         $response = $this->client->put($request->to_url());
+        echo $response->getBody();
         if ($response->getStatusCode() !== 200) {
             throw new Exception($this->convertToString($response));
         }
+
 
         $domain = json_decode($response->getBody()->getContents(), true);
         if ($domain === null) {
@@ -236,132 +285,6 @@ class API
         }
     }
 
-    // ========================================= [ TODO:? INFECTED ] =========================================
-
-    /**
-     * Searches for domains that have results / which are infected.
-     *
-     * @param string $filter Optional. An FQL based filter. Note: this filter applies to results,
-     *                       not to the actual domains!
-     *
-     * @return array A list of found infected domains.
-     */
-    public function findInfected($filter = null)
-    {
-        $url = $this->toFullURL("/v2/infected");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $infected = json_decode($response->getBody()->getContents(), true);
-        if ($infected === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $infected;
-    }
-
-    // ========================================= [ TODO:?RESULT ] =========================================
-
-    /**
-     * Searches for results of a domain which match the given filter criteria.
-     *
-     * @param integer $domainId The domain where the results should be searches for.
-     * @param string $filter Optional. An FQL based filter.
-     * @return array A list of found results.
-     */
-    public function findResults($domainId, $filter = null)
-    {
-        // TODO: is result endpoint still relevant? -> not in v3 swagger-docs
-        $url = $this->toFullURL("v2/domain/{$domainId}/result");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $results = json_decode($response->getBody()->getContents(), true);
-        if ($results === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $results;
-    }
-
-
-    /**
-     * Gets a result of a domain by its id.
-     *
-     * @param integer $domainId The domain to search for.
-     * @param integer $resultId The result to search for.
-     * @return array The found result object.
-     */
-    public function findSpecificResult($domainId, $resultId)
-    {
-        // TODO: is result endpoint still relevant? -> not in v3 swagger-docs
-        $url = $this->toFullURL("v2/domains/{$domainId}/result/{$resultId}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $result = json_decode($response->getBody()->getContents(), true);
-        if ($result === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $result;
-    }
-
-    /**
-     * Issues the API to update a given result.
-     *
-     * @param integer $domainId The id of the domain.
-     * @param integer $resultId The id of the result which should be updated.
-     * @param array $result The new result containing all fields which should be updated.
-     * @return array The updated result.
-     */
-    public function updateResult($domainId, $resultId, array $result)
-    {
-        // TODO: is result endpoint still relevant? -> not in v3 swagger-docs
-        $url = $this->toFullURL("/v2/domains/{$domainId}/result/{$resultId}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->put($request->to_url(), ["json" => $result]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $result = json_decode($response->getBody()->getContents(), true);
-        if ($result === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $result;
-    }
-
     // ========================================= [ METADATA ] =========================================
 
     public function getDomainMetadata($domainId){
@@ -427,50 +350,11 @@ class API
         return $stats;
     }
 
-    // ========================================= [ TODO:? APPLICATION ] =========================================
+    // ========================================= [ NOTIFICATIONS ] =========================================
 
-    /**
-     * Searches for all applications of a given domain.
-     *
-     * @param integer $domainId The domain to search for.
-     * @return array A list of found applications.
-     */
-    public function findApplications($domainId)
-    {
-        // TODO: is applications endpoint still relevant? -> not in v3 swagger-docs
-        $url = $this->toFullURL("v2/domain/{$domainId}/applications");
-
+    public function listNotifications(){
+        $url = $this->toFullURL("v3/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $applications = json_decode($response->getBody()->getContents(), true);
-        if ($applications === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $applications;
-    }
-
-    // ========================================= [ BUNDLE ] =========================================
-
-    /**
-     * Searches for bundles which match the given filter criteria.
-     *
-     * @param string $filter Optional. An FQL based filter.
-     * @return array A list of found bundles.
-     */
-    public function findBundles($filter = null)
-    {
-        $url = $this->toFullURL("/v2/bundle");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -480,233 +364,17 @@ class API
             throw new Exception($this->convertToString($response));
         }
 
-        $bundles = json_decode($response->getBody()->getContents(), true);
-        if ($bundles === null) {
+        $stats = json_decode($response->getBody()->getContents(), true);
+        if ($stats === null) {
             throw new Exception(json_last_error_msg());
         }
 
-        return $bundles;
+        return $stats;
     }
 
-    // ========================================= [ USER ] =========================================
-
-    /**
-     * Issues the API to create the given user.
-     *
-     * @param array $user The given user.
-     * @param boolean $upsert Optional. When set to true, creating an already existing user will not result in an error.
-    *                         Instead, it will update the existing user with the new fields.
-     * @return array The created (or updated) user.
-     */
-    public function createUser(array $user, $upsert = false)
+    public function createNotification($notification)
     {
-        $url = $this->toFullURL("/v2/user");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
-        if ($upsert) {
-            $request->set_parameter("upsert", $upsert);
-        }
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->post($request->to_url(), ["json" => $user]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $user = json_decode($response->getBody()->getContents(), true);
-        if ($user === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $user;
-    }
-
-    /**
-     * Searches for users that match the given filter criteria.
-     *
-     * @param string $filter Optional. An FQL based filter.
-     * @return array A list of found users.
-     */
-    public function findUsers($filter = null)
-    {
-        $url = $this->toFullURL("/v2/user");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $users = json_decode($response->getBody()->getContents(), true);
-        if ($users === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $users;
-    }
-
-    /**
-     * Issues the API to update a given user.
-     *
-     * @param integer $id The id of the user which should be updated.
-     * @param array $user The new user containing all fields which should be updated.
-     * @return array The updated user.
-     */
-    public function updateUser($id, array $user)
-    {
-        $url = $this->toFullURL("/v2/user/{$id}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->put($request->to_url(), ["json" => $user]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $user = json_decode($response->getBody()->getContents(), true);
-        if ($user === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $user;
-    }
-
-    /**
-     * Issues the API to delete a user.
-     *
-     * @param interger $id The id of the user to be deleted.
-     */
-    public function deleteUser($id)
-    {
-        $url = $this->toFullURL("v2/user/{$id}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-    
-        // send request
-        $response = $this->client->delete($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-    }
-
-    // ========================================= [ USER CONFIGURATION ] =========================================
-
-    /**
-     * Sets the a user configuration for a user.
-     *
-     * @param integer $id The user to set the conf for.
-     * @param string $key The key of the conf.
-     * @param string $value The value of the conf.
-     * @return string The value of the set configuration.
-     */
-    public function setUserConfiguration($id, $key, $value)
-    {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->put($request->to_url(), ["body" => $value]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        return $response->getBody()->getContents();
-    }
-
-    /**
-     * Searches for user configurations of a user.
-     *
-     * @param integer $id The user to search for.
-     * @return array A list of user configurations.
-     */
-    public function findUserConfigurations($id)
-    {
-        $url = $this->toFullURL("/v2/user/{$id}/config");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $confs = json_decode($response->getBody()->getContents(), true);
-        if ($confs === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $confs;
-    }
-
-    /**
-     * Gets the user configuration by its key.
-     *
-     * @param integer $id The user to search for.
-     * @param string $key The key of the conf.
-     * @return string The value of the user configuration.
-     */
-    public function findSpecificUserConfiguration($id, $key)
-    {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-        
-        return $response->getBody()->getContents();
-    }
-
-    /**
-     * Issues the API to delete a user configuration.
-     *
-     * @param integer $id The user to search for.
-     * @param string $key The key of the conf.
-     */
-    public function deleteUserConfiguration($id, $key)
-    {
-        $url = $this->toFullURL("/v2/user/{$id}/config/{$key}", true);
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->delete($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-    }
-
-    // ========================================= [ NOTIFICATION ] =========================================
-
-    /**
-     * Issues the API to create the given notification for a user.
-     *
-     * @param array $notification The given notification.
-     * @param integer $userId The user to search for.
-     * @return The created notification.
-     */
-    public function createNotification($notification, $userId)
-    {
-        $url = $this->toFullURL("/v2/user/{$userId}/notification");
+        $url = $this->toFullURL("/v3/notifications");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -725,6 +393,92 @@ class API
         return $notification;
     }
 
+    // ========================================= [ ISSUES ] =========================================
+
+    public function getIssue($id)
+    {
+        $url = $this->toFullURL("v3/issues/{$id}");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $issue = json_decode($response->getBody()->getContents(), true);
+        if ($issue === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $issue;
+    }
+
+    public function listIssues(){
+        $url = $this->toFullURL("v3/issues");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $issues = json_decode($response->getBody()->getContents(), true);
+        if ($issues === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $issues;
+    }
+
+    public function updateIssue($id, array $issue)
+    {
+        $url = $this->toFullURL("/v3/issues/{$id}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->put($request->to_url(), ["json" => $issue]);
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $issue = json_decode($response->getBody()->getContents(), true);
+        if ($issue === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $issue;
+    }
+
+    public function getDomainIssues(){
+        // $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
+        // $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        // $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // // send request
+        // $response = $this->client->get($request->to_url());
+        // if ($response->getStatusCode() !== 200) {
+        //     throw new Exception($this->convertToString($response));
+        // }
+
+        // $metadata = json_decode($response->getBody()->getContents(), true);
+        // if ($metadata === null) {
+        //     throw new Exception(json_last_error_msg());
+        // }
+
+        // return $metadata;
+        //TODO: needs a filter!!!!!!!!!!!!
+    }
+
+    // ========================================= [ NOTIFICATION ] =========================================
     /**
      * Searches for notifications which match the given filter criteria.
      *

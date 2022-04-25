@@ -36,24 +36,54 @@ const DEV_URL = "https://api-dev.nimbusec.com";
 $api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, DEV_URL, $options);
 
 try {
+    //===================================ISSUES===================================
 
+    $issues=$api->listIssues();
+    echo "number of issues: ".count($issues). "\n";
+
+    $issue=$api->getIssue(938738);
+    echo "issue found! id: " . $issue["id"] . " - " . $issue["status"] . "\n";
+
+
+    // TODO: get some alternativ issue statuses for testing 
+    $issue=[
+        "status"=> "pending",
+        "comment"=> "iz updated meister!",
+        "externalIds"=> null
+    ];
+
+    $issue=$api->updateIssue(938738, $issue);
+    echo "no error is tested enough! \n";
+    
+
+    
     //====================================PING====================================
 
     echo $api->ping()["message"] . "\n";
+
+    //===================================BUNDLES===================================
+
+    $bundles=$api->listBundles();
+    foreach($bundles as $bundle){
+        print_r($bundle["name"]);
+    }
+
+    $bundle=$api->getBundle($bundles[0]["id"]);
+    // echo "take it back to the top of the stack, cause we got a working get: " . $bundle["name"]; 
 
     //===================================DOMAIN===================================
 
     // Create domain
     $domain=[
-        "name"=>"crazynewnamethatstandsout.yo",
+        "name"=>"crazynewnamethatstandsoutasd.yo",
     ];
-    $domain = $api->createDomain($domain,false);
+    $domain = $api->createDomain($domain,true);
     echo "added {$domain['name']} to domains\n";
 
     // Read domain
-    $domainID = $domain["id"];
-    $domain = $api->getDomain($domainID);
-    echo "found it's ID:" . $domain["id"];
+    // $domainID = $domain["id"];
+    // $domain = $api->getDomain(13182);
+    // echo "found it's ID:" . $domain["id"];
 
     // Update domain
     $domainNameOld=$domain["name"];
@@ -85,17 +115,29 @@ try {
     // use print_r to print full metadata
     // print_r($m);
 
-    //==================================STATS====================================
+    //===================================STATS====================================
 
     $stats = $api->listStats();
     print_r($stats);
 
+    //===============================NOTIFICATIONS================================
 
+    $notification = [
+        "domain" => "12971",
+        "user" => "86976ebd-1f4a-4748-7ac4-bb655fd0a7af",
+        "transport" => "mail",
+        "blacklist" => "1",
+        "defacement" => "1",
+        "malware" => "1"
+    ];
+    
+    //$api->createNotification($notification);
+
+    $notifications = $api->listNotifications();
+    print_r($notifications);
 
     // Find results.
     // $results = $api->findResults($domain["id"]);
-    // echo "Number of results for nimbusec.com: " . count($results) . "\n";
-
     // Find infected domains with a webshell
     $infected = $api->findInfected("event=\"webshell\"");
     echo "Number of infected domains: " . count($infected) . "\n";
