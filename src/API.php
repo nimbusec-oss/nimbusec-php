@@ -79,6 +79,11 @@ class API
 
     // ========================================== [ PING ] ==========================================
 
+    /**
+     * Checks if the connection to the api can be established.
+     *
+     * @return string "pong".
+     */
     public function ping()
     {
         $url = $this->toFullURL("/v3/ping");
@@ -102,30 +107,11 @@ class API
 
     // ========================================= [ BUNDLE ] =========================================
 
-    
-    public function getBundle($id)
-    {
-        $url = $this->toFullURL("/v3/bundles/{$id}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->put($request->to_url());
-        // echo $response->getBody();
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-
-        $bundles = json_decode($response->getBody()->getContents(), true);
-        if ($bundles === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $bundles;
-    }
-
+    /**
+     * Get a list of all bundles that are active for the current account.
+     *
+     * @return array an array of bundles.
+     */
     public function listBundles(){
         $url = $this->toFullURL("v3/bundles");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
@@ -146,26 +132,74 @@ class API
 
         return $bundles;
     }
+    
+     /**
+     * Finds a specific bundle using its id
+     *
+     * @param string id of the bundle
+     * @return array a singular bundle.
+     */
+    public function getBundle($id)
+    {
+        $url = $this->toFullURL("v3/bundles/{$id}");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $bundle = json_decode($response->getBody()->getContents(), true);
+        if ($bundle === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $bundle;
+    }
 
     // ========================================= [ DOMAIN ] =========================================
+
+    /**
+     * Lists all domains.
+     *
+     * @return array A list of found domains.
+     */
+    public function listDomains()
+    {
+        $url = $this->toFullURL("/v3/domains");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $domains = json_decode($response->getBody()->getContents(), true);
+        if ($domains === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $domains;
+    }
 
     /**
      * Issues the API to create the given domain.
      *
      * @param array $domain The given domain.
-     * @param boolean $upsert Optional. When set to true, creating an already existing domain will not result in an error.
-     *                        Instead, it will update the existing domain with the new fields.
-     * @return array The created (or updated) domain.
+     * @return array The created domain.
      */
-    public function createDomain(array $domain, $upsert = false)
+    public function createDomain(array $domain)
     {
         $url = $this->toFullURL("/v3/domains");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
-        if ($upsert) {
-            $request->set_parameter("upsert", $upsert);
-        }
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
@@ -185,6 +219,12 @@ class API
         return $domain;
     }
 
+     /**
+     * Finds a certain domain by its id.
+     *
+     * @param string $id the id of the domain
+     * @return array the domain matching our id.
+     */
     public function getDomain($id)
     {
         $url = $this->toFullURL("/v3/domains/{$id}");
@@ -209,39 +249,9 @@ class API
     }
 
     /**
-     * Searches for domains that match the given filter criteria.
-     *
-     * @param string $filter Optional. An FQL based filter.
-     * @return array A list of found domains.
-     */
-    //TODO: delete
-    public function findDomains($filter = null)
-    {
-        $url = $this->toFullURL("/v3/domains");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $domains = json_decode($response->getBody()->getContents(), true);
-        if ($domains === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $domains;
-    }
-
-    /**
      * Issues the API to update a given domain.
      *
-     * @param integer $id The id of the domain which should be updated.
+     * @param string $id The id of the domain which should be updated.
      * @param array $domain The new domain containing all fields which should be updated.
      * @return array The updated domain.
      */
@@ -269,7 +279,7 @@ class API
     /**
      * Issues the API to delete a domain.
      *
-     * @param interger $id The id of the domain to be deleted.
+     * @param string $id The id of the domain to be deleted.
      */
     public function deleteDomain($id)
     {
@@ -288,6 +298,37 @@ class API
 
     // ========================================= [ METADATA ] =========================================
 
+    /**
+     * Get a list of domain metadata for all domains in your account
+     *
+     * @return array A list of found metadata.
+     */
+    public function listDomainMetadata(){
+        $url = $this->toFullURL("v3/domains/metadata");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $metadata = json_decode($response->getBody()->getContents(), true);
+        if ($metadata === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $metadata;
+    }
+
+    /**
+     * Lists the metadata of a domain in the system.
+     *
+     * @param string $domainId the domain to find.
+     * @return array an array of found metadata.
+     */
     public function getDomainMetadata($domainId){
         // $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
         $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
@@ -309,29 +350,12 @@ class API
         return $metadata;
     }
 
-    public function listDomainMetadata(){
-        $url = $this->toFullURL("v3/domains/metadata");
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $metadata = json_decode($response->getBody()->getContents(), true);
-        if ($metadata === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $metadata;
-    }
-
-    // ========================================= [ STATISTICS ] =========================================
-
-    public function listStats(){
+    /**
+     * Lists the statistics of all domains.
+     *
+     * @return array an array of found statistics.
+     */
+    public function listDomainStats(){
         $url = $this->toFullURL("v3/domains/stats");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
@@ -353,6 +377,11 @@ class API
 
     // ========================================= [ NOTIFICATIONS ] =========================================
 
+    /**
+     * Lists all notification linked to your account.
+     *
+     * @return array an array of found notifications.
+     */
     public function listNotifications(){
         $url = $this->toFullURL("v3/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
@@ -373,6 +402,12 @@ class API
         return $stats;
     }
 
+    /**
+     * Creates a new notification.
+     *
+     * @param array $notification the new notification to create.
+     * @return array the newly created notification.
+     */
     public function createNotification($notification)
     {
         $url = $this->toFullURL("/v3/notifications");
@@ -394,6 +429,12 @@ class API
         return $notification;
     }
 
+    /**
+     * Finds a specific notification by id.
+     *
+     * @param string $id the notifications id to find.
+     * @return array the corresponding notification.
+     */
     public function getNotification($id)
     {
         $url = $this->toFullURL("v3/notifications/{$id}");
@@ -415,6 +456,15 @@ class API
         return $notification;
     }
 
+
+    /**
+     * This requests updates a domain object in Nimbusec Website Security Monitor. Only changing the notification levels is supported for an update. 
+     * If you want to get notified for a different domain or via a different transport, create a new notification configuration instead.
+     *
+     * @param string $id the notfication to find.
+     * @param array the notification with updated status
+     * @return array the updated notification.
+     */
     public function updateNotification($id, array $notification)
     {
         $url = $this->toFullURL("/v3/notifications/{$id}");
@@ -436,6 +486,11 @@ class API
         return $notification;
     }
 
+    /**
+     * Deletes a notification
+     *
+     * @param string $id the id of the notification to delete.
+     */
     public function deleteNotification($id)
     {
         $url = $this->toFullURL("v3/notifications/{$id}");
@@ -452,6 +507,12 @@ class API
         }
     }
 
+    /**
+     * Gets all notifications corresponding to a given domain
+     *
+     * @param string $domainId the target domain.
+     * @return array $notifications array of notifications.
+     */
     public function getDomainNotifications($domainId){
         $url = $this->toFullURL("v3/domains/{$domainId}/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
@@ -472,6 +533,12 @@ class API
         return $notifications;
     }
 
+    /**
+     * Gets all notifications corresponding to a given user
+     *
+     * @param string $userId the id of target user.
+     * @return array $notifications array of notifications.
+     */
     public function getUserNotifications($userId){
         $url = $this->toFullURL("v3/users/{$userId}/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
@@ -494,6 +561,37 @@ class API
 
     // ========================================= [ ISSUES ] =========================================
 
+    /**
+     * Gets all issues.
+     *
+     * @return array $issues array of issues.
+     */
+    public function listIssues(){
+        $url = $this->toFullURL("v3/issues");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $issues = json_decode($response->getBody()->getContents(), true);
+        if ($issues === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $issues;
+    }
+
+    /**
+     * Gets a specific issue by id
+     *
+     * @param string $id the target issue.
+     * @return array $issue the corresponding issue.
+     */
     public function getIssue($id)
     {
         $url = $this->toFullURL("v3/issues/{$id}");
@@ -515,26 +613,14 @@ class API
         return $issue;
     }
 
-    public function listIssues(){
-        $url = $this->toFullURL("v3/issues");
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $issues = json_decode($response->getBody()->getContents(), true);
-        if ($issues === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $issues;
-    }
-
+    /**
+     * This request updates the issue status and its external ids. Issues can only be marked as "acknowledged" or "ignored", with an acompanying audit log entry. 
+     * WARNING: External IDs are overwritten on each request with the given payload.
+     *
+     * @param string $id the target issue.
+     * @param string $issue the changed issue to be updated.
+     * @return array $issue the updated issue.
+     */
     public function updateIssue($id, array $issue)
     {
         $url = $this->toFullURL("/v3/issues/{$id}");
@@ -556,27 +642,37 @@ class API
         return $issue;
     }
 
-    public function getDomainIssues(){
-        // $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
-        // $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+    /**
+     * Gets all issues for a domain
+     *
+     * @param string $domainId the target domain.
+     * @return array $issues the corresponding issues.
+     */
+    public function getDomainIssues($domainId){
+        $url = $this->toFullURL("v3/domains/{$domainId}/issues");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
-        // $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
-        // // send request
-        // $response = $this->client->get($request->to_url());
-        // if ($response->getStatusCode() !== 200) {
-        //     throw new Exception($this->convertToString($response));
-        // }
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
 
-        // $metadata = json_decode($response->getBody()->getContents(), true);
-        // if ($metadata === null) {
-        //     throw new Exception(json_last_error_msg());
-        // }
+        $issues = json_decode($response->getBody()->getContents(), true);
+        if ($issues === null) {
+            throw new Exception(json_last_error_msg());
+        }
 
-        // return $metadata;
-        //TODO: needs a filter!!!!!!!!!!!!
+        return $issues;
     }
 
+    /**
+     * Returns a issues counts grouped by the specified duration field
+     *
+     * @return array $history the corresponding history.
+     */
     public function listIssueHistory(){
         $url = $this->toFullURL("v3/issues-summary/history");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
@@ -595,303 +691,5 @@ class API
         }
 
         return $history;
-    }
-
-    // ========================================= [ OLD NOTIFICATION ] =========================================
-    /**
-     * Searches for notifications which match the given filter criteria.
-     *
-     * @param integer $userId The user to search for.
-     * @param string $filter Optional. An FQL based filter.
-     * @return array A list of found notifications.
-     */
-    public function findNotifications($userId, $filter = null)
-    {
-        $url = $this->toFullURL("/v2/user/{$userId}/notification");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $notifications = json_decode($response->getBody()->getContents(), true);
-        if ($notifications === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $notifications;
-    }
-
-    // ========================================= [ USER DOMAIN SET ] =========================================
-
-    /**
-     * Issues the API to create a domain set, assigning a given domain to a given user.
-     *
-     * @param integer $userId The given user.
-     * @param integer $domainId The given domain.
-     * @return array A list of domain sets for the user.
-     */
-    public function createDomainSet($userId, $domainId)
-    {
-        $url = $this->toFullURL("/v2/user/{$userId}/domains");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->post($request->to_url(), ["json" => $domainId]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $domainSet = json_decode($response->getBody()->getContents(), true);
-        if ($domainSet === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $domainSet;
-    }
-
-    /**
-     * Searches for a domain set by the given user.
-     *
-     * @param integer $userId The user to search for.
-     * @return array A list of domains.
-     */
-    public function findDomainSet($userId)
-    {
-        $url = $this->toFullURL("/v2/user/{$userId}/domains");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $domainSet = json_decode($response->getBody()->getContents(), true);
-        if ($domainSet === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $domainSet;
-    }
-
-    /**
-     * Issues the API to delete the given domain from the given user's domain set.
-     *
-     * @param integer $userId The user to search for.
-     * @param integer $domainId The domain to delete.
-     */
-    public function deleteFromDomainSet($userId, $domainId)
-    {
-        $url = $this->toFullURL("/v2/user/{$userId}/domains/{$domainId}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->delete($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-    }
-
-    // ========================================= [ AGENT ] =========================================
-
-    /**
-     * Searches for server agents which match the given filter criteria.
-     *
-     * @param integer $filter Optional. An FQL based filter.
-     * @return array A list of found server agents.
-     */
-    public function findServerAgents($filter = null)
-    {
-        $url = $this->toFullURL("/v2/agent/download");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $agents = json_decode($response->getBody()->getContents(), true);
-        if ($agents === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $agents;
-    }
-
-    /**
-     * Downloads you a specific server agent.
-     *
-     * @param string $os The target operating system.
-     * @param string $arch The target architecture.
-     * @param string $version The target version.
-     * @param string $type The file type. Default on "tar.gz".
-     * @return The found server agent binary
-     */
-    public function findSpecificServerAgent($os, $arch, $version, $type = "tar.gz")
-    {
-        $url = $this->toFullURL("/v2/agent/download/nimbusagent-{$os}-{$arch}-v{$version}.{$type}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        return $response->getBody()->getContents();
-    }
-
-    // ========================================= [ AGENT TOKEN ] =========================================
-
-    /**
-     * Issues the API to create the given agent token.
-     *
-     * @param array $token The given agent token.
-     * @return array The created server agent token.
-     */
-    public function createAgentToken($token)
-    {
-        $url = $this->toFullURL("/v2/agent/token");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->post($request->to_url(), ["json" => $token]);
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $token = json_decode($response->getBody()->getContents(), true);
-        if ($token === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $token;
-    }
-
-    /**
-     * Searches for agent token which match the given filter criteria.
-     *
-     * @param string $filter Optional. An FQL based filter.
-     * @return array A list of found agent token.
-     */
-    public function findAgentToken($filter = null)
-    {
-        $url = $this->toFullURL("/v2/agent/token");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-        $request->set_parameter("q", $filter);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $token = json_decode($response->getBody()->getContents(), true);
-        if ($token === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $token;
-    }
-
-    /**
-     * Issues the API to delete an agent token.
-     *
-     * @param integer $id The agent token to be deleted.
-     */
-    public function deleteAgentToken($id)
-    {
-        $url = $this->toFullURL("v2/agent/token/{$id}");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-    
-        // send request
-        $response = $this->client->delete($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-    }
-    
-    /**
-     * Searches for screenshots of a given domain ID.
-     *
-     * @param string $domainId Required. Domain ID to fetch screenshots for.
-     * @return array A list of found screenshots.
-     */
-    public function findScreenshots($domainId)
-    {
-        $domainId = intval($domainId);
-        $url = $this->toFullURL("/v2/domain/" . $domainId . "/screenshot");
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $screenshots = json_decode($response->getBody()->getContents(), true);
-        if ($screenshots === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $screenshots;
-    }
-
-    /**
-     * Get a screenshot from the URL received from @findScreenshots
-     *
-     * @param string $screenshotUrl Required. URL of the screenshot (path)
-     * @return binary string of image which can be read by imagecreatefromstrimg - https://www.php.net/manual/en/function.imagejpeg.php
-     */
-    public function getScreenshotFromUrl($screenshotUrl)
-    {
-        $url = $this->toFullURL($screenshotUrl);
-
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
-
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
-
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
-
-        $screenshotStr = $response->getBody()->getContents();
-        if ($screenshotStr === null) {
-            throw new Exception(json_last_error_msg());
-        }
-
-        return $screenshotStr;
     }
 }

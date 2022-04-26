@@ -127,7 +127,7 @@ try {
     echo "del {$domain['id']}\n";
 
     // List all domains
-    $domains = $api->findDomains();
+    $domains = $api->listDomains();
     foreach ($domains as $domain) {
         echo $domain["name"] . "\n";
     }
@@ -148,7 +148,7 @@ try {
 
     //===================================STATS====================================
 
-    $stats = $api->listStats();
+    $stats = $api->listDomainStats();
     print_r($stats);
 
 } catch (Exception $e) {
