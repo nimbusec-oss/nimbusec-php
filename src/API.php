@@ -214,6 +214,7 @@ class API
      * @param string $filter Optional. An FQL based filter.
      * @return array A list of found domains.
      */
+    //TODO: delete
     public function findDomains($filter = null)
     {
         $url = $this->toFullURL("/v3/domains");
@@ -381,6 +382,27 @@ class API
 
         // send request
         $response = $this->client->post($request->to_url(), ["json" => $notification]);
+        if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $notification = json_decode($response->getBody()->getContents(), true);
+        if ($notification === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $notification;
+    }
+
+    public function getNotification($id)
+    {
+        $url = $this->toFullURL("v3/notifications/{$id}");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
         if ($response->getStatusCode() !== 200) {
             throw new Exception($this->convertToString($response));
         }
@@ -391,6 +413,83 @@ class API
         }
 
         return $notification;
+    }
+
+    public function updateNotification($id, array $notification)
+    {
+        $url = $this->toFullURL("/v3/notifications/{$id}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->put($request->to_url(), ["json" => $notification]);
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $notification = json_decode($response->getBody()->getContents(), true);
+        if ($notification === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $notification;
+    }
+
+    public function deleteNotification($id)
+    {
+        $url = $this->toFullURL("v3/notifications/{$id}");
+
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+    
+        // send request
+        $response = $this->client->delete($request->to_url());
+        // 204 is the correct response for successfull delete
+        echo $response->getBody();
+        if ($response->getStatusCode() !== 204) {
+            throw new Exception($this->convertToString($response));
+        }
+    }
+
+    public function getDomainNotifications($domainId){
+        $url = $this->toFullURL("v3/domains/{$domainId}/notifications");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $notifications = json_decode($response->getBody()->getContents(), true);
+        if ($notifications === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $notifications;
+    }
+
+    public function getUserNotifications($userId){
+        $url = $this->toFullURL("v3/users/{$userId}/notifications");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $notifications = json_decode($response->getBody()->getContents(), true);
+        if ($notifications === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $notifications;
     }
 
     // ========================================= [ ISSUES ] =========================================
@@ -478,7 +577,27 @@ class API
         //TODO: needs a filter!!!!!!!!!!!!
     }
 
-    // ========================================= [ NOTIFICATION ] =========================================
+    public function listIssueHistory(){
+        $url = $this->toFullURL("v3/issues-summary/history");
+        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+        // send request
+        $response = $this->client->get($request->to_url());
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception($this->convertToString($response));
+        }
+
+        $history = json_decode($response->getBody()->getContents(), true);
+        if ($history === null) {
+            throw new Exception(json_last_error_msg());
+        }
+
+        return $history;
+    }
+
+    // ========================================= [ OLD NOTIFICATION ] =========================================
     /**
      * Searches for notifications which match the given filter criteria.
      *

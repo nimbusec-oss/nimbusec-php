@@ -36,6 +36,34 @@ const DEV_URL = "https://api-dev.nimbusec.com";
 $api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, DEV_URL, $options);
 
 try {
+
+    //===============================NOTIFICATIONS================================
+
+    $notification = [
+        "domain" => 12971,
+        "user" => "86976ebd-1f4a-4748-7ac4-bb655fd0a7af",
+        "transport" => "mail",
+        "blacklist" => 1,
+        "defacement" => 1,
+        "malware" => 1
+    ];
+    
+    $notification=$api->createNotification($notification);
+    $notification=$api->getNotification($notification["id"]);
+
+    $notification["malware"]=0;
+    $notification=$api->updateNotification($notification["id"], $notification);
+    // print_r($notification);
+
+    $notifications = $api->getDomainNotifications(12971);
+    print_r($notifications);
+
+    $notification=$api->deleteNotification($notification["id"]);
+    echo "nothing ever happened \n";
+
+    $notifications = $api->listNotifications();
+    //print_r($notifications);
+
     //===================================ISSUES===================================
 
     $issues=$api->listIssues();
@@ -43,6 +71,9 @@ try {
 
     $issue=$api->getIssue(938738);
     echo "issue found! id: " . $issue["id"] . " - " . $issue["status"] . "\n";
+
+    $ihistory=$api->listIssueHistory();
+    echo "issue history track record: " . count($ihistory);
 
 
     // TODO: get some alternativ issue statuses for testing 
@@ -120,47 +151,6 @@ try {
     $stats = $api->listStats();
     print_r($stats);
 
-    //===============================NOTIFICATIONS================================
-
-    $notification = [
-        "domain" => "12971",
-        "user" => "86976ebd-1f4a-4748-7ac4-bb655fd0a7af",
-        "transport" => "mail",
-        "blacklist" => "1",
-        "defacement" => "1",
-        "malware" => "1"
-    ];
-    
-    //$api->createNotification($notification);
-
-    $notifications = $api->listNotifications();
-    print_r($notifications);
-
-    // Find results.
-    // $results = $api->findResults($domain["id"]);
-    // Find infected domains with a webshell
-    $infected = $api->findInfected("event=\"webshell\"");
-    echo "Number of infected domains: " . count($infected) . "\n";
-
-    // Create a new user.
-    $user = [
-        "login" => "john.doe@example.com",
-        "mail" => "john.doe@example.com",
-        "role" => "user",
-        "forename" => "John",
-        "surname" => "Doe"
-    ];
-    $created = $api->createUser($user);
-    echo "Created a new user with name {$created['forename']} {$created['surname']}\n";
-
-    // Update the user.
-    $created["forename"] = "Franz";
-    $updated = $api->updateUser($created["id"], $created);
-    echo "Now we have {$updated['forename']} {$updated['surname']}\n";
-
-    // Delete the previously created and updated user.
-    $api->deleteUser($updated["id"]);
-    echo "He is gone\n";
 } catch (Exception $e) {
     echo "[x] an error occured: {$e->getMessage()}\n";
 }
