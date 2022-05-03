@@ -227,18 +227,16 @@ class API
      */
     public function getDomain($id)
     {
-        $url = $this->toFullURL("/v3/domains/{$id}");
-
+        $url = $this->toFullURL("v3/domains/{$id}");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
         // send request
-        $response = $this->client->put($request->to_url());
-        echo $response->getBody();
+        $response = $this->client->get($request->to_url());
         if ($response->getStatusCode() !== 200) {
             throw new Exception($this->convertToString($response));
         }
-
 
         $domain = json_decode($response->getBody()->getContents(), true);
         if ($domain === null) {
