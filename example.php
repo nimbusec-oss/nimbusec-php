@@ -7,8 +7,8 @@ require_once("vendor/autoload.php");
 use Nimbusec\API as API;
 
 // Set credentials.
-$NIMBUSEC_KEY = "FkFTtI3QMX6t2U5ZzYHVSXxRyr7QcJ9e";
-$NIMBUSEC_SECRET = "VvZkEDCArOF5Y5jD5UcSkAbDy9zSob0b";
+$NIMBUSEC_KEY = "";
+$NIMBUSEC_SECRET = "";
 
 // Create a Nimbusec API client instance.
 // The default URL parameter may be omitted.
