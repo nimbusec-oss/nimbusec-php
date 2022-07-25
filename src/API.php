@@ -205,7 +205,7 @@ class API
 
         // send request
         $response = $this->client->post($request->to_url(), ["json" => $domain]);
-        // "all 200 status codes are results of successfull REST requests"
+        // "all 200 status codes are results of successful REST requests"
         // substr($response->getStatusCode(), 0, 1)!=="2"
         if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
             throw new Exception($this->convertToString($response));
@@ -288,7 +288,7 @@ class API
     
         // send request
         $response = $this->client->delete($request->to_url());
-        // 204 is the correct response for successfull delete
+        // 204 is the correct response for successful delete
         if ($response->getStatusCode() !== 204) {
             throw new Exception($this->convertToString($response));
         }
@@ -525,7 +525,7 @@ class API
     
         // send request
         $response = $this->client->delete($request->to_url());
-        // 204 is the correct response for successfull delete
+        // 204 is the correct response for successful delete
         echo $response->getBody();
         if ($response->getStatusCode() !== 204) {
             throw new Exception($this->convertToString($response));
@@ -761,28 +761,55 @@ class API
 	 * @return array $history the corresponding history.
 	 */
 	public function listIssueHistory(){
-			$url = $this->toFullURL("/v3/issues-summary/history");
-			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+		$url = $this->toFullURL("/v3/issues-summary/history");
+		$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
-			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+		$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
-			// send request
-			$response = $this->client->get($request->to_url());
-			if ($response->getStatusCode() !== 200) {
-					throw new Exception($this->convertToString($response));
-			}
+		// send request
+		$response = $this->client->get($request->to_url());
+		if ($response->getStatusCode() !== 200) {
+				throw new Exception($this->convertToString($response));
+		}
 
-			$history = json_decode($response->getBody()->getContents(), true);
-			if ($history === null) {
-					throw new Exception(json_last_error_msg());
-			}
+		$history = json_decode($response->getBody()->getContents(), true);
+		if ($history === null) {
+				throw new Exception(json_last_error_msg());
+		}
 
-			return $history;
+		return $history;
 	}
 
 	// ========================================= [ AGENTS ] =========================================
 
+	/**
+	 * Lists available server agents
+	 *
+	 * @return array A list of found server agents.
+	 */
+	public function listAgents()
+	{
+		$url = $this->toFullURL("/v3/agent/download");
+
+		$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+		$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+		// send request
+		$response = $this->client->get($request->to_url());
+		if ($response->getStatusCode() !== 200) {
+				throw new Exception($this->convertToString($response));
+		}
+
+		$agents = json_decode($response->getBody()->getContents(), true);
+		if ($agents === null) {
+				throw new Exception(json_last_error_msg());
+		}
+
+		return $agents;
+	}
 	//TODO:
+
 
 	// ========================================= [ AGENT-TOKENS ] =========================================
 
@@ -829,7 +856,7 @@ class API
 
 			// send request
 			$response = $this->client->post($request->to_url(), ["json" => $token]);
-			// "all 200 status codes are results of successfull REST requests"
+			// "all 200 status codes are results of successful REST requests"
 			// substr($response->getStatusCode(), 0, 1)!=="2"
 			if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
 					throw new Exception($this->convertToString($response));
@@ -884,7 +911,7 @@ class API
 	
 			// send request
 			$response = $this->client->delete($request->to_url());
-			// 204 is the correct response for successfull delete
+			// 204 is the correct response for successful delete
 			if ($response->getStatusCode() !== 204) {
 					throw new Exception($this->convertToString($response));
 			}
@@ -935,7 +962,7 @@ class API
 
 			// send request
 			$response = $this->client->post($request->to_url(), ["json" => $user]);
-			// "all 200 status codes are results of successfull REST requests"
+			// "all 200 status codes are results of successful REST requests"
 			// substr($response->getStatusCode(), 0, 1)!=="2"
 			if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
 					throw new Exception($this->convertToString($response));
@@ -1018,7 +1045,7 @@ class API
 	
 			// send request
 			$response = $this->client->delete($request->to_url());
-			// 204 is the correct response for successfull delete
+			// 204 is the correct response for successful delete
 			if ($response->getStatusCode() !== 204) {
 					throw new Exception($this->convertToString($response));
 			}
@@ -1124,12 +1151,222 @@ class API
 	
 			// send request
 			$response = $this->client->delete($request->to_url());
-			// 204 is the correct response for successfull delete
+			// 204 is the correct response for successful delete
 			if ($response->getStatusCode() !== 204) {
 					throw new Exception($this->convertToString($response));
 			}
 	}
 
+	// ========================================= [ USER-DOMAIN-SET ] =========================================
 
+	/**
+	 * List user assigned domains.
+	 *
+	 * @return array A list of found domains.
+	 */
+	public function listUserDomainSet($id)
+	{
+			$url = $this->toFullURL("/v3/users/{$id}/domains");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$domains = json_decode($response->getBody()->getContents(), true);
+			if ($domains === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $domains;
+	}
+
+	/**
+	 * Issues the API to update a given user domain set.
+	 *
+	 * @param string $userID the id of the user
+	 * @param array $domains The new list of domain IDs
+	 * @return array The updated domain set.
+	 */
+	public function updateUserDomainSet($userID, $domainSet)
+	{
+			$url = $this->toFullURL("/v3/users/{$userID}/domains");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->put($request->to_url(), ["json" => $domainSet]);
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$domainSet = json_decode($response->getBody()->getContents(), true);
+			if ($domainSet === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $domainSet;
+	}
+
+	/**
+	 * Issues the API to add a domain to given users domain set.
+	 *
+	 * @param string $userID the id of the user
+	 * @param array $domainID The domain to add to said users domain set
+	 * @return array The updated domain set.
+	 */
+	public function addDomainToUserDomainSet($userID, $domainID)
+	{
+			$url = $this->toFullURL("/v3/users/{$userID}/domains/{$domainID}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->put($request->to_url(), ["json" => ""]);
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$domainSet = json_decode($response->getBody()->getContents(), true);
+			if ($domainSet === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $domainSet;
+	}
+
+	/**
+	 * Issues the API to remove a domain from given users domain set.
+	 *
+	 * @param string $userID the id of the user
+	 * @param string $domainID the id of the domain
+	 */
+	public function removeDomainFromUserDomainSet($userID, $domainID)
+	{
+		$url = $this->toFullURL("/v3/users/{$userID}/domains/{$domainID}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+	
+			// send request
+			$response = $this->client->delete($request->to_url());
+			// 204 is the correct response for successful delete
+			if ($response->getStatusCode() !== 204) {
+					throw new Exception($this->convertToString($response));
+			}
+	}
+
+	// ========================================= [ USER-FAVORITE ] =========================================
+
+	/**
+	 * List users favorite domains.
+	 *
+	 * @return array A list of found domains.
+	 */
+	public function listUserFavorite($id)
+	{
+			$url = $this->toFullURL("/v3/users/{$id}/favorites");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$domains = json_decode($response->getBody()->getContents(), true);
+			if ($domains === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $domains;
+	}
+
+	/**
+	 * Issues the API to update a given user favorite domains.
+	 *
+	 * @param string $userID the id of the user
+	 * @param array $domains The new list of domain IDs
+	 * @return array The updated domain set.
+	 */
+	public function updateUserFavorite($userID, $domainSet)
+	{
+			$url = $this->toFullURL("/v3/users/{$userID}/favorites");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->put($request->to_url(), ["json" => $domainSet]);
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$domainSet = json_decode($response->getBody()->getContents(), true);
+			if ($domainSet === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $domainSet;
+	}
+
+	/**
+	 * Issues the API to add a domain to given users favorites.
+	 *
+	 * @param string $userID the id of the user
+	 * @param array $domainID The domain to add to said users domain set
+	 * @return array The updated domain set.
+	 */
+	public function assignDomainToUserFavorite($userID, $domainID)
+	{
+			$url = $this->toFullURL("/v3/users/{$userID}/favorites/{$domainID}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->put($request->to_url(), ["json" => ""]);
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$domainSet = json_decode($response->getBody()->getContents(), true);
+			if ($domainSet === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $domainSet;
+	}
+
+	/**
+	 * Issues the API to remove a domain from given users favorites.
+	 *
+	 * @param string $userID the id of the user
+	 * @param string $domainID the id of the domain
+	 */
+	public function removeDomainFromUserFavorites($userID, $domainID)
+	{
+		$url = $this->toFullURL("/v3/users/{$userID}/favorites/{$domainID}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+	
+			// send request
+			$response = $this->client->delete($request->to_url());
+			// 204 is the correct response for successful delete
+			if ($response->getStatusCode() !== 204) {
+					throw new Exception($this->convertToString($response));
+			}
+	}
 
 }
