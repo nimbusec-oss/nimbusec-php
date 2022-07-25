@@ -113,7 +113,7 @@ class API
      * @return array an array of bundles.
      */
     public function listBundles(){
-        $url = $this->toFullURL("v3/bundles");
+        $url = $this->toFullURL("/v3/bundles");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -141,7 +141,7 @@ class API
      */
     public function getBundle($id)
     {
-        $url = $this->toFullURL("v3/bundles/{$id}");
+        $url = $this->toFullURL("/v3/bundles/{$id}");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -227,7 +227,7 @@ class API
      */
     public function getDomain($id)
     {
-        $url = $this->toFullURL("v3/domains/{$id}");
+        $url = $this->toFullURL("/v3/domains/{$id}");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -281,7 +281,7 @@ class API
      */
     public function deleteDomain($id)
     {
-        $url = $this->toFullURL("v3/domains/{$id}");
+        $url = $this->toFullURL("/v3/domains/{$id}");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -294,6 +294,34 @@ class API
         }
     }
 
+		//TODO: Test
+		/**
+     * Patches a specified domain to be disabled.
+     *
+     * @param string $id The id of the domain to be disabled.
+     */
+		public function disableDomain($id)
+    {
+			$url = $this->toFullURL("/v3/domains/{$id}/disable");
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PATCH", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$response = json_decode($response->getBody()->getContents(), true);
+			if ($response === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $response;
+    }
+
+
     // ========================================= [ METADATA ] =========================================
 
     /**
@@ -302,7 +330,7 @@ class API
      * @return array A list of found metadata.
      */
     public function listDomainMetadata(){
-        $url = $this->toFullURL("v3/domains/metadata");
+        $url = $this->toFullURL("/v3/domains/metadata");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -328,8 +356,7 @@ class API
      * @return array an array of found metadata.
      */
     public function getDomainMetadata($domainId){
-        // $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
-        $url = $this->toFullURL("v3/domains/{$domainId}/metadata");
+        $url = $this->toFullURL("/v3/domains/{$domainId}/metadata");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -354,7 +381,7 @@ class API
      * @return array an array of found statistics.
      */
     public function listDomainStats(){
-        $url = $this->toFullURL("v3/domains/stats");
+        $url = $this->toFullURL("/v3/domains/stats");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -381,7 +408,7 @@ class API
      * @return array an array of found notifications.
      */
     public function listNotifications(){
-        $url = $this->toFullURL("v3/notifications");
+        $url = $this->toFullURL("/v3/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -435,7 +462,7 @@ class API
      */
     public function getNotification($id)
     {
-        $url = $this->toFullURL("v3/notifications/{$id}");
+        $url = $this->toFullURL("/v3/notifications/{$id}");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -491,7 +518,7 @@ class API
      */
     public function deleteNotification($id)
     {
-        $url = $this->toFullURL("v3/notifications/{$id}");
+        $url = $this->toFullURL("/v3/notifications/{$id}");
 
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -512,7 +539,7 @@ class API
      * @return array $notifications array of notifications.
      */
     public function getDomainNotifications($domainId){
-        $url = $this->toFullURL("v3/domains/{$domainId}/notifications");
+        $url = $this->toFullURL("/v3/domains/{$domainId}/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -538,7 +565,7 @@ class API
      * @return array $notifications array of notifications.
      */
     public function getUserNotifications($userId){
-        $url = $this->toFullURL("v3/users/{$userId}/notifications");
+        $url = $this->toFullURL("/v3/users/{$userId}/notifications");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -565,7 +592,7 @@ class API
      * @return array $issues array of issues.
      */
     public function listIssues(){
-        $url = $this->toFullURL("v3/issues");
+        $url = $this->toFullURL("/v3/issues");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -592,7 +619,7 @@ class API
      */
     public function getIssue($id)
     {
-        $url = $this->toFullURL("v3/issues/{$id}");
+        $url = $this->toFullURL("/v3/issues/{$id}");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -647,7 +674,7 @@ class API
      * @return array $issues the corresponding issues.
      */
     public function getDomainIssues($domainId){
-        $url = $this->toFullURL("v3/domains/{$domainId}/issues");
+        $url = $this->toFullURL("/v3/domains/{$domainId}/issues");
         $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
         $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
@@ -666,28 +693,443 @@ class API
         return $issues;
     }
 
-    /**
-     * Returns a issues counts grouped by the specified duration field
+		// ========================================= [ APPLICATIONS ] =========================================
+
+		//TODO: test
+		/**
+     * Returns applications for a certain domain.
      *
-     * @return array $history the corresponding history.
+     * @return array $applications - the corresponding applications.
      */
-    public function listIssueHistory(){
-        $url = $this->toFullURL("v3/issues-summary/history");
-        $request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+    public function listApplicationsByDomain($domainId){
+			$url = $this->toFullURL("/v3/domains/{$domainId}/applications");
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
 
-        $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
-        // send request
-        $response = $this->client->get($request->to_url());
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception($this->convertToString($response));
-        }
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
 
-        $history = json_decode($response->getBody()->getContents(), true);
-        if ($history === null) {
-            throw new Exception(json_last_error_msg());
-        }
+			$applications = json_decode($response->getBody()->getContents(), true);
+			if ($applications === null) {
+					throw new Exception(json_last_error_msg());
+			}
 
-        return $history;
-    }
+			return $applications;
+	}
+
+	// ========================================= [ SCREENSHOTS ] =========================================
+
+	//TODO: Test
+	/**
+     * Searches for screenshots of a given domain ID.
+     *
+     * @param string $domainId Required. Domain ID to fetch screenshots for.
+     * @return array A list of found screenshots.
+     */
+	public function findScreenshots($domainId)
+	{
+			$domainId = intval($domainId);
+			$url = $this->toFullURL("/v3/domain/" . $domainId . "/screenshot");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$screenshots = json_decode($response->getBody()->getContents(), true);
+			if ($screenshots === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $screenshots;
+	}
+
+
+	// ========================================= [ ISSUE-HISTORY ] =========================================
+	/**
+	 * Returns a issues counts grouped by the specified duration field
+	 *
+	 * @return array $history the corresponding history.
+	 */
+	public function listIssueHistory(){
+			$url = $this->toFullURL("/v3/issues-summary/history");
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$history = json_decode($response->getBody()->getContents(), true);
+			if ($history === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $history;
+	}
+
+	// ========================================= [ AGENTS ] =========================================
+
+	//TODO:
+
+	// ========================================= [ AGENT-TOKENS ] =========================================
+
+	//TODO: token-scheme doesnt correspond to Swagger docs
+	/**
+	 * Lists all tokens.
+	 *
+	 * @return array A list of found tokens.
+	 */
+	public function listTokens()
+	{
+			$url = $this->toFullURL("/v3/tokens");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+			$tokens = json_decode($response->getBody()->getContents(), true);
+			if ($tokens === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $tokens;
+	}
+
+	/**
+	 * Issues the API to create the given token.
+	 *
+	 * @param array $token The given token.
+	 * @return array The created token.
+	 */
+	public function createToken(array $token)
+	{
+			$url = $this->toFullURL("/v3/tokens");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->post($request->to_url(), ["json" => $token]);
+			// "all 200 status codes are results of successfull REST requests"
+			// substr($response->getStatusCode(), 0, 1)!=="2"
+			if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
+					throw new Exception($this->convertToString($response));
+			}
+			
+			$token = json_decode($response->getBody()->getContents(), true);
+			if ($token === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $token;
+	}
+
+		/**
+	 * Finds a certain token by its id.
+	 *
+	 * @param string $id the id of the token
+	 * @return array the token matching our id.
+	 */
+	public function getToken($id)
+	{
+			$url = $this->toFullURL("/v3/tokens/{$id}");
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$token = json_decode($response->getBody()->getContents(), true);
+			if ($token === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $token;
+	}
+
+	/**
+	 * Issues the API to delete a token.
+	 *
+	 * @param string $id The id of the token to be deleted.
+	 */
+	public function deleteToken($id)
+	{
+			$url = $this->toFullURL("/v3/tokens/{$id}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+	
+			// send request
+			$response = $this->client->delete($request->to_url());
+			// 204 is the correct response for successfull delete
+			if ($response->getStatusCode() !== 204) {
+					throw new Exception($this->convertToString($response));
+			}
+	}
+
+	// ========================================= [ USERS ] =========================================
+	
+	/**
+	 * Lists all users.
+	 *
+	 * @return array A list of found users.
+	 */
+	public function listUsers()
+	{
+			$url = $this->toFullURL("/v3/users");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$users = json_decode($response->getBody()->getContents(), true);
+			if ($users === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $users;
+	}
+
+	/**
+	 * Issues the API to create the given user.
+	 *
+	 * @param array $user The given user.
+	 * @return array The created user.
+	 */
+	public function createUser(array $user)
+	{
+			$url = $this->toFullURL("/v3/users");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "POST", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->post($request->to_url(), ["json" => $user]);
+			// "all 200 status codes are results of successfull REST requests"
+			// substr($response->getStatusCode(), 0, 1)!=="2"
+			if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
+					throw new Exception($this->convertToString($response));
+			}
+			
+			$user = json_decode($response->getBody()->getContents(), true);
+			if ($user === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $user;
+	}
+
+		/**
+	 * Finds a certain user by its id.
+	 *
+	 * @param string $id the id of the user
+	 * @return array the user matching our id.
+	 */
+	public function getUser($id)
+	{
+			$url = $this->toFullURL("/v3/users/{$id}");
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$user = json_decode($response->getBody()->getContents(), true);
+			if ($user === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $user;
+	}
+
+	/**
+	 * Issues the API to update a given user.
+	 *
+	 * @param string $id The id of the user which should be updated.
+	 * @param array $user The new user containing all fields which should be updated.
+	 * @return array The updated user.
+	 */
+	public function updateUser($id, array $user)
+	{
+			$url = $this->toFullURL("/v3/users/{$id}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->put($request->to_url(), ["json" => $user]);
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$user = json_decode($response->getBody()->getContents(), true);
+			if ($user === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $user;
+	}
+
+	/**
+	 * Issues the API to delete a user.
+	 *
+	 * @param string $id The id of the user to be deleted.
+	 */
+	public function deleteUser($id)
+	{
+			$url = $this->toFullURL("/v3/users/{$id}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+	
+			// send request
+			$response = $this->client->delete($request->to_url());
+			// 204 is the correct response for successfull delete
+			if ($response->getStatusCode() !== 204) {
+					throw new Exception($this->convertToString($response));
+			}
+	}
+	
+	// ========================================= [ USER-CONFIGURATION ] =========================================
+
+	/**
+	 * List user configuration keys.
+	 *
+	 * @return array A list of found userconfigs.
+	 */
+	public function listUserConfigs($id)
+	{
+			$url = $this->toFullURL("/v3/users/{$id}/configs");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$config = json_decode($response->getBody()->getContents(), true);
+			if ($config === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $config;
+	}
+
+	/**
+	 * Finds a certain user config by its id.
+	 *
+	 * @param string $userID the id of the user
+	 * @param string $configID the id of the config
+	 */
+	public function getUserConfig($userID, $configID)
+	{
+			$url = $this->toFullURL("/v3/users/{$userID}/configs/{$configID}");
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "GET", $url);
+
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->get($request->to_url());
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$config = json_decode($response->getBody()->getContents(), true);
+			if ($config === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $config;
+	}
+
+	/**
+	 * Issues the API to update a given user config.
+	 *
+	 * @param string $userID the id of the user
+	 * @param string $configID the id of the config
+	 * @param array $config The new config containing all fields which should be updated.
+	 * @return array The updated config.
+	 */
+	public function updateUserConfig($userID, $configID, $config)
+	{
+			$url = $this->toFullURL("/v3/users/{$userID}/configs/{$configID}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "PUT", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+
+			// send request
+			$response = $this->client->put($request->to_url(), ["json" => $config]);
+			if ($response->getStatusCode() !== 200) {
+					throw new Exception($this->convertToString($response));
+			}
+
+			$config = json_decode($response->getBody()->getContents(), true);
+			if ($config === null) {
+					throw new Exception(json_last_error_msg());
+			}
+
+			return $config;
+	}
+
+	/**
+	 * Issues the API to delete a users config.
+	 *
+	 * @param string $userID the id of the user
+	 * @param string $configID the id of the config
+	 */
+	public function deleteUserConfig($userID, $configID)
+	{
+		$url = $this->toFullURL("/v3/users/{$userID}/configs/{$configID}");
+
+			$request = OAuthRequest::from_consumer_and_token($this->consumer, null, "DELETE", $url);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
+	
+			// send request
+			$response = $this->client->delete($request->to_url());
+			// 204 is the correct response for successfull delete
+			if ($response->getStatusCode() !== 204) {
+					throw new Exception($this->convertToString($response));
+			}
+	}
+
+
+
 }
