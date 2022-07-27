@@ -1193,7 +1193,7 @@ class API
 	 * @param array $domains The new list of domain IDs
 	 * @return array The updated domain set.
 	 */
-	public function updateUserDomainSet($userID, $domainSet)
+	public function updateUserDomainSet($userID, array $domainSet)
 	{
 			$url = $this->toFullURL("/v3/users/{$userID}/domains");
 
@@ -1203,15 +1203,16 @@ class API
 			// send request
 			$response = $this->client->put($request->to_url(), ["json" => $domainSet]);
 			if ($response->getStatusCode() !== 200) {
+
 					throw new Exception($this->convertToString($response));
 			}
 
-			$domainSet = json_decode($response->getBody()->getContents(), true);
-			if ($domainSet === null) {
-					throw new Exception(json_last_error_msg());
-			}
+			// $domains = json_decode($response->getBody()->getContents(), true);
+			// if ($domains === null) {
+			// 		throw new Exception(json_last_error_msg());
+			// }
 
-			return $domainSet;
+			// return $domains;
 	}
 
 	/**
@@ -1229,17 +1230,17 @@ class API
 			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
 			// send request
-			$response = $this->client->put($request->to_url(), ["json" => ""]);
+			$response = $this->client->put($request->to_url(), null);
 			if ($response->getStatusCode() !== 200) {
 					throw new Exception($this->convertToString($response));
 			}
 
-			$domainSet = json_decode($response->getBody()->getContents(), true);
-			if ($domainSet === null) {
-					throw new Exception(json_last_error_msg());
-			}
+			// $domainSet = json_decode($response->getBody()->getContents(), true);
+			// if ($domainSet === null) {
+			// 		throw new Exception(json_last_error_msg());
+			// }
 
-			return $domainSet;
+			// return $domainSet;
 	}
 
 	/**
@@ -1270,7 +1271,7 @@ class API
 	 *
 	 * @return array A list of found domains.
 	 */
-	public function listUserFavorite($id)
+	public function listUserFavorites($id)
 	{
 			$url = $this->toFullURL("/v3/users/{$id}/favorites");
 
@@ -1299,7 +1300,7 @@ class API
 	 * @param array $domains The new list of domain IDs
 	 * @return array The updated domain set.
 	 */
-	public function updateUserFavorite($userID, $domainSet)
+	public function updateUserFavorites($userID, $favorites)
 	{
 			$url = $this->toFullURL("/v3/users/{$userID}/favorites");
 
@@ -1307,7 +1308,7 @@ class API
 			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
 			// send request
-			$response = $this->client->put($request->to_url(), ["json" => $domainSet]);
+			$response = $this->client->put($request->to_url(), ["json" => $favorites]);
 			if ($response->getStatusCode() !== 200) {
 					throw new Exception($this->convertToString($response));
 			}
@@ -1327,7 +1328,7 @@ class API
 	 * @param array $domainID The domain to add to said users domain set
 	 * @return array The updated domain set.
 	 */
-	public function assignDomainToUserFavorite($userID, $domainID)
+	public function addDomainToUserFavorites($userID, $domainID)
 	{
 			$url = $this->toFullURL("/v3/users/{$userID}/favorites/{$domainID}");
 
@@ -1335,17 +1336,10 @@ class API
 			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $this->consumer, null);
 
 			// send request
-			$response = $this->client->put($request->to_url(), ["json" => ""]);
+			$response = $this->client->put($request->to_url(), null);
 			if ($response->getStatusCode() !== 200) {
 					throw new Exception($this->convertToString($response));
 			}
-
-			$domainSet = json_decode($response->getBody()->getContents(), true);
-			if ($domainSet === null) {
-					throw new Exception(json_last_error_msg());
-			}
-
-			return $domainSet;
 	}
 
 	/**
@@ -1368,5 +1362,4 @@ class API
 					throw new Exception($this->convertToString($response));
 			}
 	}
-
 }
