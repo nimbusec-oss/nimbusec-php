@@ -160,7 +160,8 @@ try {
 
 	// find specific screenshot
 	$screenshot = $api->findScreenshot($domainID, "current");
-	echo "current screenshot for domain {$domainID} was found";
+	file_put_contents("screenshot.jpeg", $screenshot);
+	echo "current screenshot for domain {$domainID} was saved";
 
 	echo "\n";
 } catch (Exception $e) {

@@ -40,7 +40,9 @@ try {
 
 	// get a specific agent 
 	$agent = $api->findSpecificAgent($a["os"], $a["arch"], $a["version"], $a["format"]);
-	echo "found specific agent\n";
+	file_put_contents("agent." . $a["format"], $agent);
+
+	echo "downloaded agent -> agent.{$a["format"]} \n";
 
 	//===============================AGENT-TOKENS===============================
 	echo "\n----AGENT-TOKENS----\n";

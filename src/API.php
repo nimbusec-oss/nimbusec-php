@@ -1276,7 +1276,7 @@ class API
 		$response = $this->client->put($request->to_url(), null);
 		if ($response->getStatusCode() !== 200) {
 			throw new Exception($this->convertToString($response));
-		}‚
+		}
 	}
 
 	/**

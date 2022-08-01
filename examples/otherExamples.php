@@ -32,7 +32,7 @@ try {
 
 	//===================================BUNDLES===================================
 	echo "\n----Bundles----\n";
-	
+
 	// list all bundles
 	$bundles = $api->listBundles();
 	echo "bundles: ";

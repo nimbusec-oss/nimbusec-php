@@ -98,7 +98,7 @@ try {
 	//=============================USER-CONFIGURATION==============================
 	echo "\n----USER-CONFIGURATION----\n";
 
-	// TODO: only users with a valid cBundle can access configuration files, insert an eligible users ID below to access their configs
+	// TODO: only users with a valid bundle can access configuration files, insert an eligible users ID below to access their configs
 	$userID = "";
 
 	echo "list of configs: for user {$userID}\n";
@@ -110,21 +110,21 @@ try {
 	echo "-END-\n";
 
 	// testing with config at index 0
-	$configID=$configs[0]["key"];
+	$configID = $configs[0]["key"];
 
 	// get a config by id
 	$config = $api->getUserConfig($userID, $configID);
 	echo "found the config: {$config["key"]}: {$config["value"]}\n";
 
 	// update config
-	$configValueOld=$config["value"];
-	$config["value"]="true";
-	$config=$api->updateUserConfig($userID,$configID, $config);
-	echo "updated user config {$config["key"]}'s value from: {$configValueOld}  to: + {$config["value"]}\n" ;
+	$configValueOld = $config["value"];
+	$config["value"] = "true";
+	$config = $api->updateUserConfig($userID, $configID, $config);
+	echo "updated user config {$config["key"]}'s value from: {$configValueOld}  to: + {$config["value"]}\n";
 	// revert update
-	$config["value"]=$configValueOld;
-	$config=$api->updateUserConfig($userID,$configID, $config);
-	echo "reverted user config {$config["key"]}'s value to: {$config["value"]}\n" ;
+	$config["value"] = $configValueOld;
+	$config = $api->updateUserConfig($userID, $configID, $config);
+	echo "reverted user config {$config["key"]}'s value to: {$config["value"]}\n";
 
 	//TODO: uncomment in order to delete a config 
 	// delete config
