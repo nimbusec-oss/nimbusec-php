@@ -91,7 +91,9 @@ try {
 }
 ```
 
-Take a look at our provided [example file](https://github.com/cumulodev/nimbusec-php/blob/master/example.php) for futher usages.
+Take a look at our provided [example scripts](https://github.com/cumulodev/nimbusec-php/blob/master/examples) for futher usages.
+Note that some examples cannot be executed dynamically, whenever this is the case, you'll find a "TODO:"-comment with a short description on how to use the corresponding endpoint. 
+**Mind that these examples do naturally change entries in the database!** They should only be used as a reference in combination with our [swagger documentation](https://openapi.nimbusec.com/#/)
 
 Contribution
 ------------
