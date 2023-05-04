@@ -1,6 +1,6 @@
 <?php
 // Include autoloader to load Nimbusec API automatically.
-require_once("../vendor/autoload.php");
+require_once("vendor/autoload.php");
 
 // Set an alias for Nimbusec API.
 use Nimbusec\API as API;
