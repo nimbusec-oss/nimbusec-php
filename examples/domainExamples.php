@@ -9,17 +9,9 @@ use Nimbusec\API as API;
 $NIMBUSEC_KEY = "";
 $NIMBUSEC_SECRET = "";
 
-$options = [
-	'max'             => 5,
-	'strict'          => false,
-	'referer'         => false,
-	'protocols'       => ['http', 'https'],
-	'track_redirects' => false
-];
-
 const DEV_URL = "https://api-dev.nimbusec.com";
 
-$api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, DEV_URL, $options);
+$api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, DEV_URL);
 
 // !!! Mind that these examples do naturally change entries in the database, it is recommended to use them as a reference only !!!
 
@@ -42,7 +34,7 @@ try {
 	$domain = [
 		"name" => "newdomain.com",
 	];
-	$domain = $api->createDomain($domain, true);
+	$domain = $api->createDomain($domain);
 	echo "added {$domain['name']} to domains \n";
 
 	// get a domain by id

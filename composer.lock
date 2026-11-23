@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6079e83c89433379942059fd82536615",
+    "content-hash": "abcec2785d47d260f32abc487b31bf5a",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -412,6 +412,54 @@
             ],
             "time": "2026-11-21T23:48:40+00:00",
             "published-time": "2026-11-21T23:49:39+00:00"
+        },
+        {
+            "name": "kamermans/guzzle-oauth2-subscriber",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kamermans/guzzle-oauth2-subscriber.git",
+                "reference": "7c311987ce7dcb6bfcd8320cc64588ad8fca075a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kamermans/guzzle-oauth2-subscriber/zipball/7c311987ce7dcb6bfcd8320cc64588ad8fca075a",
+                "reference": "7c311987ce7dcb6bfcd8320cc64588ad8fca075a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "Guzzle ~4.0|~5.0|~6.0|~7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "kamermans\\OAuth2\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Steve Kamerman",
+                    "email": "stevekamerman@gmail.com"
+                }
+            ],
+            "description": "OAuth 2.0 client for Guzzle 4, 5, 6 and 7+",
+            "keywords": [
+                "Guzzle",
+                "oauth"
+            ],
+            "support": {
+                "issues": "https://github.com/kamermans/guzzle-oauth2-subscriber/issues",
+                "source": "https://github.com/kamermans/guzzle-oauth2-subscriber/tree/v1.1.1"
+            },
+            "time": "2025-05-13T19:40:57+00:00",
+            "published-time": "2025-05-13T19:46:52+00:00"
         },
         {
             "name": "psr/http-client",

@@ -9,17 +9,9 @@ use Nimbusec\API as API;
 $NIMBUSEC_KEY = "";
 $NIMBUSEC_SECRET = "";
 
-$options = [
-	'max'             => 5,
-	'strict'          => false,
-	'referer'         => false,
-	'protocols'       => ['http', 'https'],
-	'track_redirects' => false
-];
-
 const DEV_URL = "https://api-dev.nimbusec.com";
 
-$api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, DEV_URL, $options);
+$api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, DEV_URL);
 
 // !!! Mind that these examples do naturally change entries in the database, it is recommended to use them as a reference only !!!
 
@@ -44,8 +36,8 @@ try {
 		"mail" => "test@nimbusec.com",
 		"role" => "user"
 	];
-	$user = $api->createUser($user, true);
-	echo "added {$user["login"]} to domains \n";
+	$user = $api->createUser($user);
+	echo "added {$user["login"]} to users \n";
 
 	// get a user by id
 	$user = $api->getUser($user["id"]);
@@ -55,7 +47,7 @@ try {
 	$userNameOld = $user["forename"];
 	$user["forename"] = "Max";
 	$user = $api->updateUser($user["id"], $user);
-	echo "updated their forname: \"{$userNameOld}\"  to: {$user['forename']}\n";
+	echo "updated their forename: \"{$userNameOld}\"  to: {$user['forename']}\n";
 
 	// delete user
 	$api->deleteUser($user["id"]);

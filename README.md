@@ -45,7 +45,7 @@ After installing, use Composer's autoloader to get it running:
 
 ```php
 <?php
-require ("vendor/autoload.php")
+require ("vendor/autoload.php");
 
 use Nimbusec\API as API;
 
@@ -81,7 +81,7 @@ $api = new API($NIMBUSEC_KEY, $NIMBUSEC_SECRET, API::DEFAULT_URL);
 
 try {
     // Fetch domains.
-    $domains = $api->findDomains();
+    $domains = $api->listDomains();
     foreach ($domains as $domain) {
         echo $domain["name"] . "\n";
     }
@@ -109,7 +109,10 @@ composer update
 
 This installs all PHPUnit dependencies that you need to run our Unittest.
 
-Our Unittests can be found at /tests and expect three environment variables to be set:
+Our Unittests can be found at /tests. The unit tests (APITest) run offline against
+a mocked HTTP handler and never require credentials. The integration tests
+(Domain, Bundle, User, Agent) talk to the live API and expect the following
+environment variables to be set, otherwise they are skipped:
 
 ```bash
 export SDK_KEY="your key"
@@ -120,7 +123,7 @@ export SDK_URL="https://api.nimbusec.com"
 export SDK_BUNDLE="the id of your bundle"
 ```
 
-When having them set, run the Composer script to test them:
+Run the Composer script to test them:
 
 ```bash
 composer test
