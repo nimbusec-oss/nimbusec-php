@@ -9,7 +9,7 @@ class UserTest extends TestCase
     private $user;
     private $domain;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->api = new API(
             getenv("SDK_KEY"),
@@ -41,7 +41,7 @@ class UserTest extends TestCase
     public function testFindUsers()
     {
         $users = $this->api->findUsers();
-        $this->assertInternalType("array", $users);
+        $this->assertIsArray($users);
         return $users[0];
     }
 
@@ -89,7 +89,7 @@ class UserTest extends TestCase
     public function testFindUserConfigurations(array $user)
     {
         $confs = $this->api->findUserConfigurations($user["id"]);
-        $this->assertInternalType("array", $confs);
+        $this->assertIsArray($confs);
     }
 
     /**
@@ -140,7 +140,7 @@ class UserTest extends TestCase
     public function testCreateDomainSet($user, $domain)
     {
         $set = $this->api->createDomainSet($user["id"], $domain["id"]);
-        $this->assertInternalType("array", $set);
+        $this->assertIsArray($set);
         $this->assertNotEmpty($set);
         return array($user, $domain);
     }

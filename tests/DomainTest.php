@@ -8,7 +8,7 @@ class DomainTest extends TestCase
     private $api;
     private $domain;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->api = new API(
             getenv("SDK_KEY"),
@@ -32,7 +32,7 @@ class DomainTest extends TestCase
     public function testFindDomains()
     {
         $domains = $this->api->findDomains();
-        $this->assertInternalType("array", $domains);
+        $this->assertIsArray($domains);
         return $domains[0];
     }
 
@@ -90,7 +90,7 @@ class DomainTest extends TestCase
     public function testFindResults(array $domain)
     {
         $results = $this->api->findResults($domain["id"]);
-        $this->assertInternalType("array", $results);
+        $this->assertIsArray($results);
         return $results;
     }
 
@@ -116,7 +116,7 @@ class DomainTest extends TestCase
     public function testFindApplications(array $domain)
     {
         $applications = $this->api->findApplications($domain["id"]);
-        $this->assertInternalType("array", $applications);
+        $this->assertIsArray($applications);
     }
 
     /**

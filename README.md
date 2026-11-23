@@ -16,7 +16,7 @@ More information about the structure of our API can be found at [our knowledge b
 Requirements
 ---------------
 
-The API client requires PHP >=5.6.0 to run successfully.
+The API client requires PHP >=8.0.0 to run successfully.
 
 Installing Client
 --------------------

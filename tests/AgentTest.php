@@ -9,7 +9,7 @@ class AgentTest extends TestCase
     private $token;
     private $agentVer;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->api = new API(
             getenv("SDK_KEY"),
@@ -29,7 +29,7 @@ class AgentTest extends TestCase
     public function testFindAgentToken()
     {
         $token = $this->api->findAgentToken();
-        $this->assertInternalType("array", $token);
+        $this->assertIsArray($token);
         return $token[0];
     }
 
@@ -61,7 +61,7 @@ class AgentTest extends TestCase
     public function testFindServerAgents()
     {
         $agents = $this->api->findServerAgents();
-        $this->assertInternalType("array", $agents);
+        $this->assertIsArray($agents);
         return $agents[0];
     }
 

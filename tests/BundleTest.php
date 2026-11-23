@@ -7,7 +7,7 @@ class BundleTest extends TestCase
 {
     private $api;
     
-    public function setUp()
+    public function setUp(): void
     {
         $this->api = new API(
             getenv("SDK_KEY"),
@@ -21,7 +21,7 @@ class BundleTest extends TestCase
     public function testFindBundles()
     {
         $bundles = $this->api->findBundles();
-        $this->assertInternalType("array", $bundles);
+        $this->assertIsArray($bundles);
         return $bundles[0];
     }
 
