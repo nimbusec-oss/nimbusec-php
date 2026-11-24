@@ -55,6 +55,9 @@ class API
 			"verify" => CaBundle::getBundledCaBundlePath(),
 			"http_errors" => false,
 			"connect_timeout" => 20,
+			// OAuth2Middleware only signs requests carrying this option, so it
+			// must be part of the client config for authentication to happen.
+			"auth" => "oauth",
 			"handler" => $stack,
 		];
 		// user supplied options take precedence over the defaults
@@ -93,6 +96,48 @@ class API
 			$url .= "/";
 		}
 		return $url;
+	}
+
+	/**
+	 * Decodes a JSON response body.
+	 *
+	 * @param Response $response The response to decode.
+	 * @return mixed The decoded body, or null when the API returned no content.
+	 */
+	private function decodeJsonBody(Response $response)
+	{
+		$body = (string) $response->getBody();
+		if (trim($body) === "") {
+			return null;
+		}
+
+		$decoded = json_decode($body, true);
+		if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+			throw new Exception(json_last_error_msg());
+		}
+
+		return $decoded;
+	}
+
+	/**
+	 * Normalises domain IDs into the {"domains": [...]} payload the API expects.
+	 *
+	 * Accepts either a bare list of domain IDs or an already wrapped array so
+	 * existing callers keep working.
+	 *
+	 * @param mixed $domainSet The domain IDs.
+	 * @return array The request payload.
+	 */
+	private function normalizeDomainSet($domainSet)
+	{
+		if (!is_array($domainSet)) {
+			$domainSet = [$domainSet];
+		}
+		if (array_key_exists("domains", $domainSet) && is_array($domainSet["domains"])) {
+			$domainSet = $domainSet["domains"];
+		}
+
+		return ["domains" => array_values($domainSet)];
 	}
 
 	// ========================================== [ PING ] ==========================================
@@ -1117,26 +1162,24 @@ class API
 	 * Issues the API to update a given user domain set.
 	 *
 	 * @param string $userID the id of the user
-	 * @param array $domains The new list of domain IDs
-	 * @return array The updated domain set.
+	 * @param array $domainSet The new list of domain IDs. A bare list or an
+	 *                         already wrapped ["domains" => [...]] array is accepted.
+	 * @return array The updated domain set. The API confirms the update with an
+	 *               empty body, in which case the applied payload is returned.
 	 */
 	public function updateUserDomainSet($userID, array $domainSet)
 	{
 		$url = $this->toFullURL("/v3/users/{$userID}/domains");
 
 		// send request
+		$domainSet = $this->normalizeDomainSet($domainSet);
 		$response = $this->client->request("PUT", $url, ["json" => $domainSet]);
 		if ($response->getStatusCode() !== 200) {
-
 			throw new Exception($this->convertToString($response));
 		}
 
-		$domainSet = json_decode($response->getBody()->getContents(), true);
-		if ($domainSet === null) {
-			throw new Exception(json_last_error_msg());
-		}
-
-		return $domainSet;
+		$result = $this->decodeJsonBody($response);
+		return $result === null ? $domainSet : $result;
 	}
 
 	/**
@@ -1144,7 +1187,7 @@ class API
 	 *
 	 * @param string $userID the id of the user
 	 * @param array $domainID The domain to add to said users domain set
-	 * @return array The updated domain set.
+	 * @return void
 	 */
 	public function addDomainToUserDomainSet($userID, $domainID)
 	{
@@ -1155,13 +1198,6 @@ class API
 		if ($response->getStatusCode() !== 200) {
 			throw new Exception($this->convertToString($response));
 		}
-
-		$domainSet = json_decode($response->getBody()->getContents(), true);
-		if ($domainSet === null) {
-			throw new Exception(json_last_error_msg());
-		}
-
-		return $domainSet;
 	}
 
 	/**
@@ -1211,25 +1247,24 @@ class API
 	 * Issues the API to update a given user favorite domains.
 	 *
 	 * @param string $userID the id of the user
-	 * @param array $domains The new list of domain IDs
-	 * @return array The updated domain set.
+	 * @param array $favorites The new list of domain IDs. A bare list or an
+	 *                         already wrapped ["domains" => [...]] array is accepted.
+	 * @return array The updated favorites. The API confirms the update with an
+	 *               empty body, in which case the applied payload is returned.
 	 */
 	public function updateUserFavorites($userID, $favorites)
 	{
 		$url = $this->toFullURL("/v3/users/{$userID}/favorites");
 
 		// send request
+		$favorites = $this->normalizeDomainSet($favorites);
 		$response = $this->client->request("PUT", $url, ["json" => $favorites]);
 		if ($response->getStatusCode() !== 200) {
 			throw new Exception($this->convertToString($response));
 		}
 
-		$domainSet = json_decode($response->getBody()->getContents(), true);
-		if ($domainSet === null) {
-			throw new Exception(json_last_error_msg());
-		}
-
-		return $domainSet;
+		$result = $this->decodeJsonBody($response);
+		return $result === null ? $favorites : $result;
 	}
 
 	/**
@@ -1237,7 +1272,7 @@ class API
 	 *
 	 * @param string $userID the id of the user
 	 * @param string $domainID The domain to add to said users favorites
-	 * @return array The updated list of favorite domains.
+	 * @return void
 	 */
 	public function addDomainToUserFavorites($userID, $domainID)
 	{
@@ -1248,13 +1283,6 @@ class API
 		if ($response->getStatusCode() !== 200) {
 			throw new Exception($this->convertToString($response));
 		}
-
-		$domainSet = json_decode($response->getBody()->getContents(), true);
-		if ($domainSet === null) {
-			throw new Exception(json_last_error_msg());
-		}
-
-		return $domainSet;
 	}
 
 	/**
