@@ -55,6 +55,9 @@ class API
 			"verify" => CaBundle::getBundledCaBundlePath(),
 			"http_errors" => false,
 			"connect_timeout" => 20,
+			// OAuth2Middleware only signs requests carrying this option, so it
+			// must be part of the client config for authentication to happen.
+			"auth" => "oauth",
 			"handler" => $stack,
 		];
 		// user supplied options take precedence over the defaults
