@@ -1092,10 +1092,14 @@ class API
 	/**
 	 * Issues the API to update a given user config.
 	 *
+	 * The API responds with 201 Created the first time a configuration is
+	 * written and with 200 OK on subsequent updates.
+	 *
 	 * @param string $userID the id of the user
 	 * @param string $configID the id of the config
 	 * @param array $config The new config containing all fields which should be updated.
-	 * @return array The updated config.
+	 * @return array The updated config. If the API returns no body, the
+	 *               submitted config is returned.
 	 */
 	public function updateUserConfig($userID, $configID, $config)
 	{
@@ -1103,16 +1107,12 @@ class API
 
 		// send request
 		$response = $this->client->request("PUT", $url, ["json" => $config]);
-		if ($response->getStatusCode() !== 200) {
+		if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
 			throw new Exception($this->convertToString($response));
 		}
 
-		$config = json_decode($response->getBody()->getContents(), true);
-		if ($config === null) {
-			throw new Exception(json_last_error_msg());
-		}
-
-		return $config;
+		$result = $this->decodeJsonBody($response);
+		return $result === null ? $config : $result;
 	}
 
 	/**
